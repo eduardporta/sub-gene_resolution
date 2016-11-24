@@ -1,0 +1,13 @@
+Feature	Variable	Covered	Percent
+Structures (>95%)	Aminoacids	Covered	0.120382883719533
+Structures (>95%)	Aminoacids	Not covered	0.879617116280467
+Structures (e-value < 1e-9)	Aminoacids	Covered	0.341789889758881
+Structures (e-value < 1e-9)	Aminoacids	Not covered	0.658210110241119
+Linear regions	Aminoacids	Covered	0.560549453683464
+Linear regions	Aminoacids	Not covered	0.439450546316536
+Structures (>95%)	Proteins	Covered	0.264100576939637
+Structures (>95%)	Proteins	Not covered	0.735899423060363
+Structures (e-value < 1e-9)	Proteins	Covered	0.557177301300267
+Structures (e-value < 1e-9)	Proteins	Not covered	0.442822698699733
+Linear regions	Proteins	Covered	0.888960647550159
+Linear regions	Proteins	Not covered	0.111039352449841
