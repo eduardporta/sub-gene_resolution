@@ -1,929 +1,3 @@
-erbb4
-erbb2
-suppressMessages(require ("iPAC"))#
-suppressMessages(require ("GraphPAC"))#
-suppressMessages(require ("SpacePAC"))
-sum (mut.data[,1058])
-sum (mut.data[,940])
-sum (mut.data[,939])
-get.SingleLetterCode <-#
-function(code){#
-  if(code == "GLY"){return ("G")}#
-  else if(code == "PRO"){return ("P")}#
-  else if(code == "ALA"){return ("A")}#
-  else if(code == "VAL"){return ("V")}#
-  else if(code == "LEU"){return ("L")}#
-  else if(code == "ILE"){return ("I")}#
-  else if(code == "MET"){return ("M")}#
-  else if(code == "CYS"){return ("C")}#
-  else if(code == "PHE"){return ("F")}#
-  else if(code == "TYR"){return ("Y")}#
-  else if(code == "TRP"){return ("W")}#
-  else if(code == "HIS"){return ("H")}#
-  else if(code == "LYS"){return ("K")}#
-  else if(code == "ARG"){return ("R")}#
-  else if(code == "GLN"){return ("Q")}#
-  else if(code == "ASN"){return ("N")}#
-  else if(code == "GLU"){return ("E")}#
-  else if(code == "ASP"){return ("D")}#
-  else if(code == "SER"){return ("S")}#
-  else if(code == "THR"){return ("T")}#
-  else{return("X")}#
-}
-get.SingleLetterCode ("GLY")
-install.packages ("iPAC")
-install.packages (source = "iPAC")
-install.packages (source = "iPAC/")
-library (iPAC)
-get.SingleLetterCode
-library ("iPAC")
-cif <- "3bce-sf.cif"
-fasta <- "thomas/review_proteins_positions/ensembl_fasta/ENSP00000269571.fasta"
-source ("iPAC/R/get.SingleLetterCode.R")
-source ("iPAC/R/get.CIFSequence.Aligned.R")
-source ("iPAC/R/get.AlignedPositions.R")
-cif
-get.AlignedPositions
-get.CIFSequence.Aligned (cif A)
-head (filedata)
-cif <- "3bce.pdb"
-filedata<- readLines(cif, n=-1)
-filedata
-get.CIFSequence.Aligned
-AtomCount <- 0#
-  N <- 10^5#
-  AtomMatrix <- data.frame(SeqId = rep(NA,N), Residue = rep(NA,N), SideChain = rep(NA, N), XCoord = rep(NA,N), YCoord = rep(NA,N), ZCoord = rep(NA,N))#
-  atom_site_found = FALSE#
-  Atom_Site_Entries <-vector()#
-  ModelNumFound = FALSE#
-#
-  for(i in 1:length(filedata)){#
-    if(substring(filedata[i],1,11)=="_atom_site."){#
-      atom_site_found = TRUE#
-      Atom_Site_Entries <- c(Atom_Site_Entries,scan(text=filedata[i], what="character",quiet = TRUE))#
-    }#
-    else if(substring(filedata[i],1,1)=="#"){ #We mark both as false to avoid an extra if condition#
-      atom_site_found = FALSE#
-    }#
-    else if(atom_site_found && substring(filedata[i],1,11)!="_atom_site." && substring(filedata[i],1,4)=="ATOM"){#
-      items<-unlist(strsplit(filedata[i]," +"))#
-      if(ModelNumFound == FALSE){#
-        first_model_found = as.numeric(items[which(Atom_Site_Entries == "_atom_site.pdbx_PDB_model_num")])#
-        if(is.null(RequiredModelNum)){#
-          RequiredModelNum = first_model_found#
-        }#
-        ModelNumFound = TRUE#
-      }#
-      if(items[which(Atom_Site_Entries == "_atom_site.auth_asym_id")] == chain_required &&#
-         items[which(Atom_Site_Entries == "_atom_site.auth_atom_id")] == "CA" &&#
-         as.numeric(items[which(Atom_Site_Entries == "_atom_site.pdbx_PDB_model_num")]) == RequiredModelNum){#
-          altID = items[which(Atom_Site_Entries == "_atom_site.label_alt_id")]#
-          if(altID == "." || altID =="A"){#
-            AtomCount <- AtomCount+1#
-            AtomMatrix[AtomCount,] <- c(items[which(Atom_Site_Entries == "_atom_site.label_seq_id")],#
-                                        items[which(Atom_Site_Entries == "_atom_site.label_comp_id")],#
-                                        items[which(Atom_Site_Entries == "_atom_site.auth_asym_id")],#
-                                        items[which(Atom_Site_Entries == "_atom_site.Cartn_x")],#
-                                        items[which(Atom_Site_Entries == "_atom_site.Cartn_y")],#
-                                        items[which(Atom_Site_Entries == "_atom_site.Cartn_z")])#
-          }#
-      }#
-    }#
-  }#
-  AtomMatrix<-AtomMatrix[1:AtomCount,]#
-  AtomMatrix[,1]<-as.numeric(AtomMatrix[,1])#
-  AtomMatrix[,4]<-as.numeric(AtomMatrix[,4])#
-  AtomMatrix[,5]<-as.numeric(AtomMatrix[,5])#
-  AtomMatrix[,6]<-as.numeric(AtomMatrix[,6])
-head (AtomMatrix)
-cif <- "3bce.cif"
-get.CIFSequence.Aligned (cif, A)
-get.CIFSequence.Aligned (cif, "A")
-prot.pos <- get.AlignedPositions (cif, fasta, A)
-prot.pos <- get.AlignedPositions (cif, fasta, "A")
-mut.data <- read.table ("thomas/review_proteins_positions/pipeline/iPAC/tmp_iPAC/matrix_ERBB2.txt", sep = "\t", header = TRUE, row.names = 1)
-mut.data <- as.matrix (mut.data)
-ClusterFind (mutation.data = mut.data, position.data = prot.pos$Positions, Include.Culled = F, Include.Full = F)
-prot.pos
-prot.pos$Alignment.Result
-res.data <- read.table ("thomas/review_proteins_positions/final_figures/raw_files/matrix_pancan.txt", sep = "\t", header = TRUE)
-head (res.data)
-head (subset (res.data, AllDriver != "No" & MutSigCV > 0.05 & OncodriveFM > 0.05))
-head (subset (res.data, AllDriver != "No" & MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 0 & AllDriver %in% c ("Other somatic drivers in other tissues", "Other somatic drivers in matching tissue")))
-head (subset (res.data, AllDriver != "No" & MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 2 & AllDriver %in% c ("Other somatic drivers in other tissues", "Other somatic drivers in matching tissue")))
-head (subset (res.data, AllDriver != "No" & MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 1 & AllDriver %in% c ("Other somatic drivers in other tissues", "Other somatic drivers in matching tissue")))
-subset (res.data, AllDriver != "No" & MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 1 & AllDriver %in% c ("Other somatic drivers in other tissues", "Other somatic drivers in matching tissue"))
-subset (res.data, AllDriver != "No" & MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 1 & AllDriver %in% c ("Other germline drivers in other tissues"))
-head (subset (res.data, AllDriver != "No" & MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 1 & !(AllDriver %in% c ("Missense somatic drivers in matching tissue"))))
-nrow (subset (res.data, AllDriver != "No" & MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 1 & !(AllDriver %in% c ("Missense somatic drivers in matching tissue"))))
-nrow (subset (res.data, AllDriver != "No" & MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 0 & !(AllDriver %in% c ("Missense somatic drivers in matching tissue"))))
-length(unique(subset (res.data, AllDriver != "No" & MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 0 & !(AllDriver %in% c ("Missense somatic drivers in matching tissue")))$Gene))
-length(unique(subset (res.data, AllDriver != "No" & MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 0 & AllDriver %in% c ("No")))$Gene))
-length(unique(subset (res.data, AllDriver != "No" & MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 0 & AllDriver %in% c ("No"))$Gene))
-head (subset (res.data, AllDriver != "No" & MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 0 & AllDriver %in% c ("No")))
-head (subset (res.data, AllDriver != "No" & MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 0))
-head (subset (res.data, AllDriver != "No" & MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 0 & KnownDriver == "No"))
-head (subset (res.data, AllDriver != "No" & MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 0 & KnownDriver == "No" & AllDriver == "No"))
-unique (res.data$AllDriver)
-head (subset (res.data, MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 0 & KnownDriver == "No" & AllDriver == "No"))
-head (subset (res.data, MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 0 & KnownDriver == "No" & AllDriver == "No" & Detected > 1))
-head (subset (res.data, MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 0 & KnownDriver == "No" & AllDriver == "No" & Detected > 1)$Gene)
-length(unique (subset (res.data, MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 0 & KnownDriver == "No" & AllDriver == "No" & Detected > 1)$Gene)))
-length(unique (subset (res.data, MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 0 & KnownDriver == "No" & AllDriver == "No" & Detected > 1)$Gene))
-length(unique (subset (res.data, MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 0 & KnownDriver == "No" & AllDriver == "No" & Detected > 2)$Gene))
-subset (res.data, MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 0 & KnownDriver == "No" & AllDriver == "No" & Detected > 2)
-hea d(parg)
-head(parg)
-parg <- read.table ("thomas/review_proteins_positions/figures/file_nmuts_PARG_luad.txt", sep = "\t", header = TRUE)
-wilcox.test (parg$Nmuts ~ parg$PARG)
-subset (res.data, MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 0 & KnownDriver == "No" & AllDriver == "No" & Detected > 5)
-subset (res.data, MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 0 & KnownDriver == "No" & AllDriver == "No" & Detected > 4)
-subset (res.data, MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 0 & KnownDriver == "No" & AllDriver == "No" & Detected > 3)
-subset (res.data[,!(c("KnownDriver", "AllDriver", "MutSigCV", "OncodriveFM"))], MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 0 & KnownDriver == "No" & AllDriver == "No" & Detected > 3)
-subset (res.data[,!c("KnownDriver", "AllDriver", "MutSigCV", "OncodriveFM")], MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 0 & KnownDriver == "No" & AllDriver == "No" & Detected > 3)
-subset (res.data[,c("KnownDriver", "AllDriver", "MutSigCV", "OncodriveFM")], MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 0 & KnownDriver == "No" & AllDriver == "No" & Detected > 3)
-subset (res.data[,-which(names(df) %in% c("KnownDriver", "AllDriver", "MutSigCV", "OncodriveFM"))], MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 0 & KnownDriver == "No" & AllDriver == "No" & Detected > 3)
-sub.study <- subset (res.data, MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 0 & KnownDriver == "No" & AllDriver == "No" & Detected > 2)
-subset (sub.study[,-which(names(df) %in% c("KnownDriver", "AllDriver", "MutSigCV", "OncodriveFM"))])
-sub.study[,-which(names(df) %in% c("KnownDriver", "AllDriver", "MutSigCV", "OncodriveFM"))]
-sub.study[,-which(names(sub.study) %in% c("KnownDriver", "AllDriver", "MutSigCV", "OncodriveFM"))]
-sub.study[,-which(names(sub.study) %in% c("KnownDriver", "AllDriver", "MutSigCV", "OncodriveFM", "Mode","CLUMPS", "e-Driver3D"))]
-sub.study[,-which(names(sub.study) %in% c("KnownDriver", "AllDriver", "MutSigCV", "OncodriveFM", "Mode","CLUMPS", "e.Driver3D"))]
-sub.study[,-which(names(sub.study) %in% c("KnownDriver", "AllDriver", "MutSigCV", "OncodriveFM", "Mode","CLUMPS", "e.Driver3D", "GraphPAC"))]
-sub.study[,-which(names(sub.study) %in% c("KnownDriver", "AllDriver", "MutSigCV", "OncodriveFM", "Mode","CLUMPS", "e.Driver3D", "GraphPAC", "Detected"))]
-25/205
-mut.data <- t (mut.data)
-score <- mut.data$Score
-nmuts <- mut.data$NMuts
-gender <- mut.data$Gender
-age <- mut.data$Age
-subtype <- mut.data$Subtype
-Anova (lm (score ~ score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(subtype) + as.factor (mut.data[,7])))
-Anova (lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(subtype) + as.factor (mut.data[,7])))
-head (mut.data[,1:7])
-t.mut.data <- t (mut.data[,6:ncol(mut.data)])
-Anova (lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(subtype) + as.factor (t.mut.data[1,])))
-test1 <- function (score, nmuts, gender, age, subtype, mut) {#
-	res.corr <- Anova (lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(subtype) + as.factor(mut)))#
-	res.sum <- summary (lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(subtype) + as.factor(mut)))#
-	return (res.corr$'Pr(>F)'[5], res.sum$coefficients[nrow(res.corr$coefficients),1])#
-}
-test1 (score, nmuts, gender, age, subtype, t.mut.data[,1])
-test1 (score, nmuts, gender, age, subtype, t.mut.data[1,])
-test1.p <- function (score, nmuts, gender, age, subtype, mut) {#
-	res.corr <- Anova (lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(subtype) + as.factor(mut)))#
-	return (res.corr$'Pr(>F)'[5])#
-}#
-#
-test1.b <- function (score, nmuts, gender, age, subtype, mut) {#
-	res.sum <- summary (lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(subtype) + as.factor(mut)))#
-	return (res.sum$coefficients[nrow(res.corr$coefficients),1])#
-}
-test1.p (score, nmuts, gender, age, subtype, t.mut.data[1,])
-test1.b <- function (score, nmuts, gender, age, subtype, mut) {#
-	res.sum <- summary (lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(subtype) + as.factor(mut)))#
-	return (res.sum$coefficients[nrow(res.sum$coefficients),1])#
-}
-test1.b (score, nmuts, gender, age, subtype, t.mut.data[1,])
-summary (lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(subtype) + as.factor (t.mut.data[1,])))
-features <- colnames (mut.data[,7:ncol(mut.data)])#
-res.m <- data.frame (Feature = features, p = 1, B = 1)#
-#
-n.subtypes <- length (unique (mut.data$Subtype))
-ptm <- proc.time()#
-#
-if (n.subtypes > 1) {#
-	for (i in 7:ncol(mut.data)) {#
-		res.corr <- Anova (lm (mut.data[,2] ~ as.numeric(as.character(mut.data[,3])) + as.factor(mut.data[,4]) + as.numeric(as.character(mut.data[,5])) + mut.data[,6] + as.factor(mut.data[,i]), data = mut.data))#
-		res.m[i-6,2] <- res.corr$'Pr(>F)'[5]#
-		res.corr <- summary (lm (mut.data[,2] ~ as.numeric(as.character(mut.data[,3])) + as.factor(mut.data[,4]) + as.numeric(as.character(mut.data[,5])) + mut.data[,6] + as.factor(mut.data[,i]), data = mut.data))#
-		res.m[i-6,3] <- res.corr$coefficients[nrow(res.corr$coefficients),1]#
-	}#
-} else {#
-	if (args[3] == "OV") {#
-		for (i in 7:ncol(mut.data)) {#
-			res.corr <- Anova (lm (mut.data[,2] ~ as.numeric(as.character(mut.data[,3])) + as.numeric(as.character(mut.data[,5]))  + as.factor(mut.data[,i]), data = mut.data))#
-			res.m[i-6,2] <- res.corr$'Pr(>F)'[3]#
-			res.corr <- summary (lm (mut.data[,2] ~ as.numeric(as.character(mut.data[,3])) + as.numeric(as.character(mut.data[,5]))  + as.factor(mut.data[,i]), data = mut.data))#
-			res.m[i-6,3] <- res.corr$coefficients[nrow(res.corr$coefficients),1]#
-		}#
-	} else {#
-		for (i in 7:ncol(mut.data)) {#
-			res.corr <- Anova (lm (mut.data[,2] ~ as.numeric(as.character(mut.data[,3])) + as.factor(mut.data[,4]) + as.numeric(as.character(mut.data[,5]))  + as.factor(mut.data[,i]), data = mut.data))#
-			res.m[i-6,2] <- res.corr$'Pr(>F)'[4]#
-			res.corr <- summary (lm (mut.data[,2] ~ as.numeric(as.character(mut.data[,3])) + as.factor(mut.data[,4]) + as.numeric(as.character(mut.data[,5]))  + as.factor(mut.data[,i]), data = mut.data))#
-			res.m[i-6,3] <- res.corr$coefficients[nrow(res.corr$coefficients),1]#
-		}#
-	}#
-}#
-#
-res.m$FDR <- p.adjust (res.m$p, method = "fdr")#
-#
-proc.time() - ptm
-mut.data <- read.table ("TCGA/CIBERSORT/matrixes/PANCAN_Leuk.txt", sep = "\t", header = TRUE, check.names = FALSE)
-features <- colnames (mut.data[,7:ncol(mut.data)])#
-res.m <- data.frame (Feature = features, p = 1, B = 1)#
-#
-n.subtypes <- length (unique (mut.data$Subtype))#
-#
-ptm <- proc.time()#
-#
-if (n.subtypes > 1) {#
-	for (i in 7:ncol(mut.data)) {#
-		res.corr <- Anova (lm (mut.data[,2] ~ as.numeric(as.character(mut.data[,3])) + as.factor(mut.data[,4]) + as.numeric(as.character(mut.data[,5])) + mut.data[,6] + as.factor(mut.data[,i]), data = mut.data))#
-		res.m[i-6,2] <- res.corr$'Pr(>F)'[5]#
-		res.corr <- summary (lm (mut.data[,2] ~ as.numeric(as.character(mut.data[,3])) + as.factor(mut.data[,4]) + as.numeric(as.character(mut.data[,5])) + mut.data[,6] + as.factor(mut.data[,i]), data = mut.data))#
-		res.m[i-6,3] <- res.corr$coefficients[nrow(res.corr$coefficients),1]#
-	}#
-} else {#
-	if (args[3] == "OV") {#
-		for (i in 7:ncol(mut.data)) {#
-			res.corr <- Anova (lm (mut.data[,2] ~ as.numeric(as.character(mut.data[,3])) + as.numeric(as.character(mut.data[,5]))  + as.factor(mut.data[,i]), data = mut.data))#
-			res.m[i-6,2] <- res.corr$'Pr(>F)'[3]#
-			res.corr <- summary (lm (mut.data[,2] ~ as.numeric(as.character(mut.data[,3])) + as.numeric(as.character(mut.data[,5]))  + as.factor(mut.data[,i]), data = mut.data))#
-			res.m[i-6,3] <- res.corr$coefficients[nrow(res.corr$coefficients),1]#
-		}#
-	} else {#
-		for (i in 7:ncol(mut.data)) {#
-			res.corr <- Anova (lm (mut.data[,2] ~ as.numeric(as.character(mut.data[,3])) + as.factor(mut.data[,4]) + as.numeric(as.character(mut.data[,5]))  + as.factor(mut.data[,i]), data = mut.data))#
-			res.m[i-6,2] <- res.corr$'Pr(>F)'[4]#
-			res.corr <- summary (lm (mut.data[,2] ~ as.numeric(as.character(mut.data[,3])) + as.factor(mut.data[,4]) + as.numeric(as.character(mut.data[,5]))  + as.factor(mut.data[,i]), data = mut.data))#
-			res.m[i-6,3] <- res.corr$coefficients[nrow(res.corr$coefficients),1]#
-		}#
-	}#
-}#
-#
-res.m$FDR <- p.adjust (res.m$p, method = "fdr")#
-#
-proc.time() - ptm
-test.all.p <- function (score, nmuts, gender, age, subtype, mut) {#
-	res.corr <- Anova (lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(subtype) + as.factor(mut)))#
-	return (res.corr$'Pr(>F)'[5])#
-}#
-#
-test.all.b <- function (score, nmuts, gender, age, subtype, mut) {#
-	res.sum <- summary (lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(subtype) + as.factor(mut)))#
-	return (res.sum$coefficients[nrow(res.sum$coefficients),1])#
-}
-mut.data <- as.matrix (mut.data)#
-t.mut.data <- t (mut.data[,6:ncol(mut.data)])#
-#
-features <- colnames (mut.data[,7:ncol(mut.data)])#
-res.m <- data.frame (Feature = features, p = 1, B = 1)#
-#
-n.subtypes <- length (unique (mut.data$Subtype))#
-#
-score <- mut.data$Score#
-nmuts <- mut.data$NMuts#
-gender <- mut.data$Gender#
-age <- mut.data$Age#
-subtype <- mut.data$Subtype#
-#
-test.all.p <- function (score, nmuts, gender, age, subtype, mut) {#
-	res.corr <- Anova (lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(subtype) + as.factor(mut)))#
-	return (res.corr$'Pr(>F)'[5])#
-}#
-#
-test.all.b <- function (score, nmuts, gender, age, subtype, mut) {#
-	res.sum <- summary (lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(subtype) + as.factor(mut)))#
-	return (res.sum$coefficients[nrow(res.sum$coefficients),1])#
-}
-head (mut.data[,1:5])
-sum (t.mut.data[1,])
-sum (t.mut.data[2,])
-sum (t.mut.data[3,])
-test.all.p <- function (mut, score, nmuts, gender, age, subtype) {#
-	res.corr <- Anova (lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(subtype) + as.factor(mut)))#
-	return (res.corr$'Pr(>F)'[5])#
-}
-t.mut.data$p <- apply (t.mut.data, 1, test.all.p, score, nmuts, gender, age, subtype)
-test.all.p <- function (mut, score, nmuts, gender, age, subtype) {#
-	res.corr <- Anova (lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(subtype) + as.factor(mut)))#
-	return (res.corr$'Pr(>F)'[5])#
-}#
-#
-test.all.b <- function (mut, score, nmuts, gender, age, subtype) {#
-	res.sum <- summary (lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(subtype) + as.factor(mut)))#
-	return (res.sum$coefficients[nrow(res.sum$coefficients),1])#
-}
-t.mut.data <- t (mut.data[,6:ncol(mut.data)])#
-t.mut.data <- as.matrix (t.mut.data)#
-#
-features <- colnames (mut.data[,7:ncol(mut.data)])#
-res.m <- data.frame (Feature = features, p = 1, B = 1)#
-#
-n.subtypes <- length (unique (mut.data$Subtype))#
-#
-score <- mut.data$Score#
-nmuts <- mut.data$NMuts#
-gender <- mut.data$Gender#
-age <- mut.data$Age#
-subtype <- mut.data$Subtype
-ptm <- proc.time()#
-	t.mut.data$p <- apply (t.mut.data, 1, test.all.p, score, nmuts, gender, age, subtype)#
-	t.mut.data$b <- apply (t.mut.data, 1, test.all.b, score, nmuts, gender, age, subtype)#
-	t.mut.data$FDR <- p.adjust (t.mut.data$p, method = "fdr")#
-	proc.time() - ptm
-help (parApply)
-mut.data <- read.table ("TCGA/CIBERSORT/matrixes/PANCAN_Leuk.txt", sep = "\t", header = TRUE, row.names = 1, sep = "\t", check.names = FALSE)
-no_cores <- detectCores() - 1#
-cl <- makeCluster(no_cores, type = "FORK")
-ptm <- proc.time()#
-	t.mut.data$p <- parApply (t.mut.data, 1, test.all.p, score, nmuts, gender, age, subtype)#
-	t.mut.data$b <- parApply (t.mut.data, 1, test.all.b, score, nmuts, gender, age, subtype)#
-	t.mut.data$FDR <- p.adjust (t.mut.data$p, method = "fdr")#
-	proc.time() - ptm
-ptm <- proc.time()#
-	no_cores <- detectCores() - 1#
-	cl <- makeCluster(no_cores, type = "FORK")#
-	t.mut.data$p <- parApply (t.mut.data, 1, test.all.p, score, nmuts, gender, age, subtype)#
-	t.mut.data$b <- parApply (t.mut.data, 1, test.all.b, score, nmuts, gender, age, subtype)#
-	t.mut.data$FDR <- p.adjust (t.mut.data$p, method = "fdr")#
-	proc.time() - ptm
-ptm <- proc.time()#
-	no_cores <- detectCores() - 1#
-	cl <- makeCluster(no_cores, type = "FORK")#
-	t.mut.data$p <- parApply (cl, t.mut.data, 1, test.all.p, score, nmuts, gender, age, subtype)#
-	t.mut.data$b <- parApply (cl, t.mut.data, 1, test.all.b, score, nmuts, gender, age, subtype)#
-	t.mut.data$FDR <- p.adjust (t.mut.data$p, method = "fdr")#
-	proc.time() - ptm
-ptm <- proc.time()#
-	no_cores <- detectCores() - 1#
-	cl <- makeCluster(no_cores, type = "FORK")#
-	t.mut.data$p <- parApply (cl, t.mut.data, 1, test.all.p, score, nmuts, gender, age, subtype)#
-	stopCluster (cl)#
-	no_cores <- detectCores() - 1#
-	cl <- makeCluster(no_cores, type = "FORK")#
-	t.mut.data$b <- parApply (cl, t.mut.data, 1, test.all.b, score, nmuts, gender, age, subtype)#
-	stopCluster (cl)#
-	t.mut.data$FDR <- p.adjust (t.mut.data$p, method = "fdr")#
-	proc.time() - ptm
-head (t.mut.data$b)
-mut.data <- read.table ("TCGA/CIBERSORT/matrixes/PANCAN_Leuk.txt", sep = "\t", header = TRUE, row.names = 1, check.names = FALSE)
-ptm <- proc.time()#
-	no_cores <- detectCores() - 1#
-	cl <- makeCluster(no_cores, type = "FORK")#
-	t.mut.data$p <- parApply (cl, t.mut.data, 1, test.all.p, score, nmuts, gender, age, subtype)#
-	stopCluster (cl)#
-	no_cores <- detectCores() - 1#
-	cl <- makeCluster(no_cores, type = "FORK")#
-	t.mut.data$b <- parApply (cl, t.mut.data[,-ncol(t.mut.data)], 1, test.all.b, score, nmuts, gender, age, subtype)#
-	stopCluster (cl)#
-	t.mut.data$FDR <- p.adjust (t.mut.data$p, method = "fdr")#
-	proc.time() - ptm
-head (t.mut.data[,-ncol(t.mut.data)])
--ncol(t.mut.data)
-ncol(t.mut.data)
-dim (t.mut.data)
-t.mut.data
-test.all <- function (mut, score, nmuts, gender, age, subtype) {#
-	mut.model <- lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(subtype) + as.factor(mut))#
-	p.anova <- Anova (mut.model)#
-	b.summary <- summary (mut.model)#
-	return (list (p.anova$'Pr(>F)'[5], model$coefficients[nrow(model$coefficients),1])#
-}
-test.all <- function (mut, score, nmuts, gender, age, subtype) {#
-	mut.model <- lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(subtype) + as.factor(mut))#
-	p.anova <- Anova (mut.model)#
-	b.summary <- summary (mut.model)#
-	return (list (p.anova$'Pr(>F)'[5], model$coefficients[nrow(model$coefficients),1]))#
-}
-t.mut.data <- t (mut.data[,6:ncol(mut.data)])#
-t.mut.data <- as.matrix (t.mut.data)#
-#
-features <- colnames (mut.data[,7:ncol(mut.data)])#
-res.m <- data.frame (Feature = features, p = 1, B = 1)#
-#
-n.subtypes <- length (unique (mut.data$Subtype))#
-#
-score <- mut.data$Score#
-nmuts <- mut.data$NMuts#
-gender <- mut.data$Gender#
-age <- mut.data$Age#
-subtype <- mut.data$Subtype#
-#
-test.all.p <- function (mut, score, nmuts, gender, age, subtype) {#
-	res.corr <- Anova (lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(subtype) + as.factor(mut)))#
-	return (res.corr$'Pr(>F)'[5])#
-}#
-#
-test.all.b <- function (mut, score, nmuts, gender, age, subtype) {#
-	res.sum <- summary (lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(subtype) + as.factor(mut)))#
-	return (res.sum$coefficients[nrow(res.sum$coefficients),1])#
-}
-head (t.mut.data],1:5)
-apply (t.mut.data[1:5,], test.all.p, score, nmuts, gender, age, subtype)
-apply (t.mut.data[1:5,], test.all.p, 1, score, nmuts, gender, age, subtype)
-apply (t.mut.data[1:5,], 1, test.all.p, score, nmuts, gender, age, subtype)
-score
-test.all <- function (mut, score, nmuts, gender, age, subtype) {#
-	mut.model <- lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(subtype) + as.factor(mut))#
-	p.anova <- Anova (mut.model)#
-	b.summary <- summary (mut.model)#
-	return (list (p.anova$'Pr(>F)'[5], b.summary$coefficients[nrow(b.summary$coefficients),1]))#
-}
-apply (t.mut.data[1:5,], 1, test.all, score, nmuts, gender, age, subtype)
-t.mut.bk <- t.mut.data
-(t.mut.data$p, t.mut.data$b) <- apply (t.mut.data[1:5,], 1, test.all, score, nmuts, gender, age, subtype)
-test.all <- function (mut, score, nmuts, gender, age, subtype) {#
-	mut.model <- lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(subtype) + as.factor(mut))#
-	p.anova <- Anova (mut.model)#
-	b.summary <- summary (mut.model)#
-	return (list (p = p.anova$'Pr(>F)'[5], b = b.summary$coefficients[nrow(b.summary$coefficients),1]))#
-}
-results <- apply (t.mut.data, 1, test.all, score, nmuts, gender, age, subtype)
-t.mut.data$p <- unlist (results)[attr(unlist(results), "names") == "p"]
-t.mut.data <- t.mut.bk
-head (unlist (results)[attr(unlist(results), "names") == "p"])
-head (results)
-head (attr(unlist(results), "names"))
-head (results$ENSP00000350719)
-head (results$ENSP00000350719$p)
-ptm <- proc.time()#
-#
-mut.data <- read.table ("TCGA/CIBERSORT/PANCAN_Leuk.txt", sep = "\t", header = TRUE, check.names = FALSE, row.names = 1)#
-t.mut.data <- t (mut.data[,6:ncol(mut.data)])#
-t.mut.data <- as.matrix (t.mut.data)#
-#
-features <- colnames (mut.data[,7:ncol(mut.data)])#
-res.m <- data.frame (Feature = features, p = 1, B = 1)#
-#
-n.subtypes <- length (unique (mut.data$Subtype))#
-#
-score <- mut.data$Score#
-nmuts <- mut.data$NMuts#
-gender <- mut.data$Gender#
-age <- mut.data$Age#
-subtype <- mut.data$Subtype#
-#
-test.all <- function (mut, score, nmuts, gender, age, subtype) {#
-	mut.model <- lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(subtype) + as.factor(mut))#
-	p.anova <- Anova (mut.model)#
-	return (p.anova$'Pr(>F)'[5])#
-}#
-#
-test.no.subtype <- function (mut, score, nmuts, gender, age) {#
-	mut.model <- lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(mut))#
-	p.anova <- Anova (mut.model)#
-	return (p.anova$'Pr(>F)'[5])#
-}#
-#
-test.ov <- function (mut, score, nmuts, age) {#
-	mut.model <- lm (score ~ as.numeric(as.character(nmuts)) + as.numeric(as.character(age)) + as.factor(mut))#
-	p.anova <- Anova (mut.model)#
-	return (p.anova$'Pr(>F)'[5])#
-}#
-#
-if (n.subtypes > 1) {#
-	no_cores <- detectCores() - 1#
-	cl <- makeCluster(no_cores, type = "FORK")#
-	t.mut.data$p <- parApply (cl, t.mut.data, 1, test.all.p, score, nmuts, gender, age, subtype)#
-	stopCluster (cl)#
-	t.mut.data$FDR <- p.adjust (t.mut.data$p, method = "fdr")#
-} else {#
-	if (args[3] == "OV") {#
-		no_cores <- detectCores() - 1#
-		cl <- makeCluster(no_cores, type = "FORK")#
-		t.mut.data$p <- parApply (cl, t.mut.data, 1, test.ov, score, nmuts, age)#
-		stopCluster (cl)#
-		t.mut.data$FDR <- p.adjust (t.mut.data$p, method = "fdr")#
-	} else {#
-		no_cores <- detectCores() - 1#
-		cl <- makeCluster(no_cores, type = "FORK")#
-		t.mut.data$p <- parApply (cl, t.mut.data, 1, test.no.subtype, score, nmuts, age)#
-		stopCluster (cl)#
-		t.mut.data$FDR <- p.adjust (t.mut.data$p, method = "fdr")#
-	}#
-}#
-#
-proc.time() - ptm
-ptm <- proc.time()#
-#
-mut.data <- read.table ("TCGA/CIBERSORT/PANCAN_Leuk.txt", sep = "\t", header = TRUE, check.names = FALSE, row.names = 1)#
-t.mut.data <- t (mut.data[,6:ncol(mut.data)])#
-t.mut.data <- as.matrix (t.mut.data)#
-#
-features <- colnames (mut.data[,7:ncol(mut.data)])#
-res.m <- data.frame (Feature = features, p = 1, B = 1)#
-#
-n.subtypes <- length (unique (mut.data$Subtype))#
-#
-score <- mut.data$Score#
-nmuts <- mut.data$NMuts#
-gender <- mut.data$Gender#
-age <- mut.data$Age#
-subtype <- mut.data$Subtype#
-#
-test.all <- function (mut, score, nmuts, gender, age, subtype) {#
-	mut.model <- lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(subtype) + as.factor(mut))#
-	p.anova <- Anova (mut.model)#
-	return (p.anova$'Pr(>F)'[5])#
-}#
-#
-test.no.subtype <- function (mut, score, nmuts, gender, age) {#
-	mut.model <- lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(mut))#
-	p.anova <- Anova (mut.model)#
-	return (p.anova$'Pr(>F)'[5])#
-}#
-#
-test.ov <- function (mut, score, nmuts, age) {#
-	mut.model <- lm (score ~ as.numeric(as.character(nmuts)) + as.numeric(as.character(age)) + as.factor(mut))#
-	p.anova <- Anova (mut.model)#
-	return (p.anova$'Pr(>F)'[5])#
-}#
-#
-if (n.subtypes > 1) {#
-	#no_cores <- detectCores() - 1#
-	#cl <- makeCluster(no_cores, type = "FORK")#
-	#t.mut.data$p <- parApply (cl, t.mut.data, 1, test.all.p, score, nmuts, gender, age, subtype)#
-	t.mut.data$p <- apply (t.mut.data, 1, test.all.p, score, nmuts, gender, age, subtype)#
-	#stopCluster (cl)#
-	t.mut.data$FDR <- p.adjust (t.mut.data$p, method = "fdr")#
-} else {#
-	if (args[3] == "OV") {#
-		no_cores <- detectCores() - 1#
-		cl <- makeCluster(no_cores, type = "FORK")#
-		t.mut.data$p <- parApply (cl, t.mut.data, 1, test.ov, score, nmuts, age)#
-		stopCluster (cl)#
-		t.mut.data$FDR <- p.adjust (t.mut.data$p, method = "fdr")#
-	} else {#
-		no_cores <- detectCores() - 1#
-		cl <- makeCluster(no_cores, type = "FORK")#
-		t.mut.data$p <- parApply (cl, t.mut.data, 1, test.no.subtype, score, nmuts, age)#
-		stopCluster (cl)#
-		t.mut.data$FDR <- p.adjust (t.mut.data$p, method = "fdr")#
-	}#
-}#
-#
-proc.time() - ptm
-mut.data <- read.table ("TCGA/CIBERSORT/PANCAN_Leuk.txt", sep = "\t", header = TRUE, check.names = FALSE, row.names = 1)#
-t.mut.data <- t (mut.data[,6:ncol(mut.data)])#
-t.mut.data <- as.matrix (t.mut.data)#
-#
-features <- colnames (mut.data[,7:ncol(mut.data)])#
-res.m <- data.frame (Feature = features, p = 1, B = 1)#
-#
-n.subtypes <- length (unique (mut.data$Subtype))#
-#
-score <- mut.data$Score#
-nmuts <- mut.data$NMuts#
-gender <- mut.data$Gender#
-age <- mut.data$Age#
-subtype <- mut.data$Subtype
-mut.data <- read.table ("/TCGA/CIBERSORT/PANCAN_Leuk.txt", sep = "\t", header = TRUE, check.names = FALSE, row.names = 1)#
-t.mut.data <- t (mut.data[,6:ncol(mut.data)])#
-t.mut.data <- as.matrix (t.mut.data)#
-#
-features <- colnames (mut.data[,7:ncol(mut.data)])#
-res.m <- data.frame (Feature = features, p = 1, B = 1)#
-#
-n.subtypes <- length (unique (mut.data$Subtype))#
-#
-score <- mut.data$Score#
-nmuts <- mut.data$NMuts#
-gender <- mut.data$Gender#
-age <- mut.data$Age#
-subtype <- mut.data$Subtype
-mut.data <- read.table ("TCGA/CIBERSORT/matrixes/PANCAN_Leuk.txt", sep = "\t", header = TRUE, check.names = FALSE, row.names = 1)
-ptm <- proc.time()#
-#
-mut.data <- read.table ("TCGA/CIBERSORT/matrixes/PANCAN_Leuk.txt", sep = "\t", header = TRUE, check.names = FALSE, row.names = 1)#
-t.mut.data <- t (mut.data[,6:ncol(mut.data)])#
-t.mut.data <- as.matrix (t.mut.data)#
-#
-features <- colnames (mut.data[,7:ncol(mut.data)])#
-res.m <- data.frame (Feature = features, p = 1, B = 1)#
-#
-n.subtypes <- length (unique (mut.data$Subtype))#
-#
-score <- mut.data$Score#
-nmuts <- mut.data$NMuts#
-gender <- mut.data$Gender#
-age <- mut.data$Age#
-subtype <- mut.data$Subtype#
-#
-test.all <- function (mut, score, nmuts, gender, age, subtype) {#
-	mut.model <- lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(subtype) + as.factor(mut))#
-	p.anova <- Anova (mut.model)#
-	return (p.anova$'Pr(>F)'[5])#
-}#
-#
-test.no.subtype <- function (mut, score, nmuts, gender, age) {#
-	mut.model <- lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(mut))#
-	p.anova <- Anova (mut.model)#
-	return (p.anova$'Pr(>F)'[5])#
-}#
-#
-test.ov <- function (mut, score, nmuts, age) {#
-	mut.model <- lm (score ~ as.numeric(as.character(nmuts)) + as.numeric(as.character(age)) + as.factor(mut))#
-	p.anova <- Anova (mut.model)#
-	return (p.anova$'Pr(>F)'[5])#
-}#
-#
-if (n.subtypes > 1) {#
-	no_cores <- detectCores() - 1#
-	cl <- makeCluster(no_cores, type = "FORK")#
-	t.mut.data$p <- parApply (cl, t.mut.data, 1, test.all.p, score, nmuts, gender, age, subtype)#
-	stopCluster (cl)#
-	t.mut.data$FDR <- p.adjust (t.mut.data$p, method = "fdr")#
-} else {#
-	if (args[3] == "OV") {#
-		no_cores <- detectCores() - 1#
-		cl <- makeCluster(no_cores, type = "FORK")#
-		t.mut.data$p <- parApply (cl, t.mut.data, 1, test.ov, score, nmuts, age)#
-		stopCluster (cl)#
-		t.mut.data$FDR <- p.adjust (t.mut.data$p, method = "fdr")#
-	} else {#
-		no_cores <- detectCores() - 1#
-		cl <- makeCluster(no_cores, type = "FORK")#
-		t.mut.data$p <- parApply (cl, t.mut.data, 1, test.no.subtype, score, nmuts, age)#
-		stopCluster (cl)#
-		t.mut.data$FDR <- p.adjust (t.mut.data$p, method = "fdr")#
-	}#
-}#
-#
-proc.time() - ptm
-mut.data <- read.table ("TCGA/CIBERSORT/matrixes/PANCAN_Leuk.txt", sep = "\t", header = TRUE, check.names = FALSE, row.names = 1)#
-t.mut.data <- t (mut.data[,6:ncol(mut.data)])#
-t.mut.data <- as.matrix (t.mut.data)#
-#
-features <- colnames (mut.data[,7:ncol(mut.data)])#
-res.m <- data.frame (Feature = features, p = 1, B = 1)#
-#
-n.subtypes <- length (unique (mut.data$Subtype))#
-#
-score <- mut.data$Score#
-nmuts <- mut.data$NMuts#
-gender <- mut.data$Gender#
-age <- mut.data$Age#
-subtype <- mut.data$Subtype
-t.bk <- t.mut.data
-no_cores <- detectCores() - 1#
-	cl <- makeCluster(no_cores, type = "FORK")#
-	t.mut.data$p <- parApply (cl, t.mut.data, 1, test.all.p, score, nmuts, gender, age, subtype)#
-	stopCluster (cl)
-class (mut.data)
-t.mut.data <- t.bk
-class (t.mut.data)
-no_cores <- detectCores() - 1#
-	cl <- makeCluster(no_cores, type = "FORK")#
-	t.mut.data <- cbind(t.mut.data, p = parApply (cl, t.mut.data, 1, test.all.p, score, nmuts, gender, age, subtype))#
-	stopCluster (cl)
-head (t.mut.data[,1:5])
-head (t.mut.data$p)
-t.mut.data <- cbind(t.mut.data, FDR = p.adjust (t.mut.data$p, method = "fdr"))
-t.mut.data <- cbind(t.mut.data, FDR = p.adjust (t.mut.data[,"p"], method = "fdr"))
-head (t.mut.data[,ncol(t.mut.data)])
-ptm <- proc.time()#
-#
-mut.data <- read.table ("TCGA/CIBERSORT/matrixes/PANCAN_Leuk.txt", sep = "\t", header = TRUE, check.names = FALSE, row.names = 1)#
-t.mut.data <- t (mut.data[,6:ncol(mut.data)])#
-t.mut.data <- as.matrix (t.mut.data)#
-#
-features <- colnames (mut.data[,7:ncol(mut.data)])#
-res.m <- data.frame (Feature = features, p = 1, B = 1)#
-#
-n.subtypes <- length (unique (mut.data$Subtype))#
-#
-score <- mut.data$Score#
-nmuts <- mut.data$NMuts#
-gender <- mut.data$Gender#
-age <- mut.data$Age#
-subtype <- mut.data$Subtype#
-#
-test.all <- function (mut, score, nmuts, gender, age, subtype) {#
-	mut.model <- lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(subtype) + as.factor(mut))#
-	p.anova <- Anova (mut.model)#
-	return (p.anova$'Pr(>F)'[5])#
-}#
-#
-test.no.subtype <- function (mut, score, nmuts, gender, age) {#
-	mut.model <- lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(mut))#
-	p.anova <- Anova (mut.model)#
-	return (p.anova$'Pr(>F)'[5])#
-}#
-#
-test.ov <- function (mut, score, nmuts, age) {#
-	mut.model <- lm (score ~ as.numeric(as.character(nmuts)) + as.numeric(as.character(age)) + as.factor(mut))#
-	p.anova <- Anova (mut.model)#
-	return (p.anova$'Pr(>F)'[5])#
-}#
-#
-if (n.subtypes > 1) {#
-	no_cores <- detectCores() - 1#
-	cl <- makeCluster(no_cores, type = "FORK")#
-	t.mut.data <- cbind(t.mut.data, p = parApply (cl, t.mut.data, 1, test.all.p, score, nmuts, gender, age, subtype))#
-	stopCluster (cl)#
-	t.mut.data <- cbind(t.mut.data, FDR = p.adjust (t.mut.data[,"p"], method = "fdr"))#
-} else {#
-	if (args[3] == "OV") {#
-		no_cores <- detectCores() - 1#
-		cl <- makeCluster(no_cores, type = "FORK")#
-		t.mut.data <- cbind(t.mut.data, p = parApply (cl, t.mut.data, 1, test.ov, score, nmuts, age))#
-		stopCluster (cl)#
-		t.mut.data <- cbind(t.mut.data, FDR = p.adjust (t.mut.data[,"p"], method = "fdr"))#
-	} else {#
-		no_cores <- detectCores() - 1#
-		cl <- makeCluster(no_cores, type = "FORK")#
-		t.mut.data <- cbind(t.mut.data, p = parApply (cl, t.mut.data, 1, test.no.subtype, score, nmuts, age))#
-		stopCluster (cl)#
-		t.mut.data <- cbind(t.mut.data, FDR = p.adjust (t.mut.data[,"p"], method = "fdr"))#
-	}#
-}#
-#
-proc.time() - ptm
-head (t.mut.data[,"p", "FDR"])
-head (t.mut.data[,c("p", "FDR")])
-115/2300
-115/2500
-library (ggplot2)
-res.driver <- read.table ("thomas/review_proteins_positions/final_figures/raw_files/matrix_pancan.txt", sep = "\t", header = TRUE)
-head (res.driver)
-sub.sig <- subset (res.driver, Detected > 2 & OncodriveFM > 0.05 & MutSigCV > 0.05)
-sub.sig <- subset (res.driver, Detected > 2 & OncodriveFM > 0.05 & MutSigCV > 0.05 & AllDriver == "No")
-head (sub.sig[,!c("NPat", "KnownDriver", "Mode", "AllDriver")])
-head (subset (-which (names (sub.sig) %in% c ("NPat", "KnownDriver"))))
-head (sub.sig [-which (names (sub.sig) %in% c ("NPat", "KnownDriver"))])
-head (sub.sig [-which (names (sub.sig) %in% c ("NPat", "KnownDriver"), "Mode", "AllDriver", "OncodriveFM", "MutSigCV")])
-head (sub.sig [-which (names (sub.sig) %in% c ("NPat", "KnownDriver", "Mode", "AllDriver", "OncodriveFM", "MutSigCV")])
-sub.sig [-which (names (sub.sig) %in% c ("NPat", "KnownDriver", "Mode", "AllDriver", "OncodriveFM", "MutSigCV"))]
-sub.sig [-which (names (sub.sig) %in% c ("NPat", "KnownDriver", "Mode", "AllDriver", "OncodriveFM", "MutSigCV", "Detected"))]
-library (parallele)
-mut.data <- read.table ("TCGA/CIBERSORT/matrixes/KICH_T_cells_CD4_memory_resting.txt", sep = "\t", header = TRUE, check.names = FALSE, row.names = 1)
-t.mut.data <- t (mut.data[,6:ncol(mut.data)])#
-t.mut.data <- as.matrix (t.mut.data)#
-#
-features <- colnames (mut.data[,7:ncol(mut.data)])#
-res.m <- data.frame (Feature = features, p = 1, B = 1)#
-#
-n.subtypes <- length (unique (mut.data$Subtype))#
-#
-score <- mut.data$Score#
-nmuts <- mut.data$NMuts#
-gender <- mut.data$Gender#
-age <- mut.data$Age#
-subtype <- mut.data$Subtype#
-#
-test.all <- function (mut, score, nmuts, gender, age, subtype) {#
-	mut.model <- lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(subtype) + as.factor(mut))#
-	p.anova <- Anova (mut.model)#
-	return (p.anova$'Pr(>F)'[5])#
-}#
-#
-test.no.subtype <- function (mut, score, nmuts, gender, age) {#
-	mut.model <- lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(mut))#
-	p.anova <- Anova (mut.model)#
-	return (p.anova$'Pr(>F)'[5])#
-}#
-#
-test.ov <- function (mut, score, nmuts, age) {#
-	mut.model <- lm (score ~ as.numeric(as.character(nmuts)) + as.numeric(as.character(age)) + as.factor(mut))#
-	p.anova <- Anova (mut.model)#
-	return (p.anova$'Pr(>F)'[5])#
-}
-n.subtypes
-no_cores <- detectCores() - 1#
-		cl <- makeCluster(no_cores, type = "FORK")#
-		t.mut.data <- cbind(t.mut.data, p = parApply (cl, t.mut.data, 1, test.no.subtype, score, nmuts, age))#
-		stopCluster (cl)#
-		t.mut.data <- cbind(t.mut.data, FDR = p.adjust (t.mut.data[,"p"], method = "fdr"))
-head (age)
-no_cores <- detectCores() - 1#
-		cl <- makeCluster(no_cores, type = "FORK")#
-		t.mut.data <- cbind(t.mut.data, p = parApply (cl, t.mut.data, 1, test.no.subtype, score, nmuts, gender, age))#
-		stopCluster (cl)#
-		t.mut.data <- cbind(t.mut.data, FDR = p.adjust (t.mut.data[,"p"], method = "fdr"))
-mut.data <- read.table ("TCGA/CIBERSORT/matrixes/TGCT_Neutrophils.txt", sep = "\t", header = TRUE, check.names = FALSE, row.names = 1)
-unique (mut.data$Gender)
-mut.data <- read.table ("TCGA/CIBERSORT/matrixes/DLBC_NK_cells_resting.txt", sep = "\t", header = TRUE, check.names = FALSE, row.names = 1)
-unique (mut.data$Score)
-mut.data <- read.table ("TCGA/CIBERSORT/matrixes/SKCM_B_cells_memory.txt", sep = "\t", header = TRUE, check.names = FALSE, row.names = 1)
-head (mut.data[,1:10])
-library (car)
-library (parallel)
-args <- c ("NA", "NA", "SKCM")
-t.mut.data <- t (mut.data[,6:ncol(mut.data)])#
-t.mut.data <- as.matrix (t.mut.data)#
-#
-features <- colnames (mut.data[,7:ncol(mut.data)])#
-res.m <- data.frame (Feature = features, p = 1, B = 1)#
-#
-n.subtypes <- length (unique (mut.data$Subtype))#
-#
-score <- mut.data$Score#
-nmuts <- mut.data$NMuts#
-gender <- mut.data$Gender#
-age <- mut.data$Age#
-subtype <- mut.data$Subtype#
-#
-test.all <- function (mut, score, nmuts, gender, age, subtype) {#
-	mut.model <- lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(subtype) + as.factor(mut))#
-	p.anova <- Anova (mut.model)#
-	return (p.anova$'Pr(>F)'[5])#
-}#
-#
-test.no.subtype <- function (mut, score, nmuts, gender, age) {#
-	mut.model <- lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(mut))#
-	p.anova <- Anova (mut.model)#
-	return (p.anova$'Pr(>F)'[5])#
-}#
-#
-test.ov <- function (mut, score, nmuts, age) {#
-	mut.model <- lm (score ~ as.numeric(as.character(nmuts)) + as.numeric(as.character(age)) + as.factor(mut))#
-	p.anova <- Anova (mut.model)#
-	return (p.anova$'Pr(>F)'[5])#
-}#
-#
-if (n.subtypes > 1) {#
-	no_cores <- detectCores() - 1#
-	cl <- makeCluster(no_cores, type = "FORK")#
-	t.mut.data <- cbind(t.mut.data, p = parApply (cl, t.mut.data, 1, test.all, score, nmuts, gender, age, subtype))#
-	stopCluster (cl)#
-	t.mut.data <- cbind(t.mut.data, FDR = p.adjust (t.mut.data[,"p"], method = "fdr"))#
-} else {#
-	if (args[3] == "OV" | args[3] == "TGCT" | args[3] == "UCS" | args[3] == "PRAD") {#
-		no_cores <- detectCores() - 1#
-		cl <- makeCluster(no_cores, type = "FORK")#
-		t.mut.data <- cbind(t.mut.data, p = parApply (cl, t.mut.data, 1, test.ov, score, nmuts, age))#
-		stopCluster (cl)#
-		t.mut.data <- cbind(t.mut.data, FDR = p.adjust (t.mut.data[,"p"], method = "fdr"))#
-	} else {#
-		no_cores <- detectCores() - 1#
-		cl <- makeCluster(no_cores, type = "FORK")#
-		t.mut.data <- cbind(t.mut.data, p = parApply (cl, t.mut.data, 1, test.no.subtype, score, nmuts, gender, age))#
-		stopCluster (cl)#
-		t.mut.data <- cbind(t.mut.data, FDR = p.adjust (t.mut.data[,"p"], method = "fdr"))#
-	}#
-}
-lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(mut)
-mut <- t.mut.data[,15]
-)
-length (mut)
-length (gender)
-t.mut.data <- t (mut.data[,6:ncol(mut.data)])#
-t.mut.data <- as.matrix (t.mut.data)
-mut <- t.mut.data[15,]
-lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(mut))
-mut.model <- lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(mut))#
-	p.anova <- Anova (mut.model)
-p.anova
-t.mut.data <- t (mut.data[,6:ncol(mut.data)])#
-t.mut.data <- as.matrix (t.mut.data)#
-#
-features <- colnames (mut.data[,7:ncol(mut.data)])#
-res.m <- data.frame (Feature = features, p = 1, B = 1)#
-#
-n.subtypes <- length (unique (mut.data$Subtype))#
-#
-score <- mut.data$Score#
-nmuts <- mut.data$NMuts#
-gender <- mut.data$Gender#
-age <- mut.data$Age#
-subtype <- mut.data$Subtype#
-#
-test.all <- function (mut, score, nmuts, gender, age, subtype) {#
-	mut.model <- lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(subtype) + as.factor(mut))#
-	p.anova <- Anova (mut.model)#
-	return (p.anova$'Pr(>F)'[5])#
-}#
-#
-test.no.subtype <- function (mut, score, nmuts, gender, age) {#
-	mut.model <- lm (score ~ as.numeric(as.character(nmuts)) + as.factor(gender) + as.numeric(as.character(age)) + as.factor(mut))#
-	p.anova <- Anova (mut.model)#
-	return (p.anova$'Pr(>F)'[4])#
-}#
-#
-test.ov <- function (mut, score, nmuts, age) {#
-	mut.model <- lm (score ~ as.numeric(as.character(nmuts)) + as.numeric(as.character(age)) + as.factor(mut))#
-	p.anova <- Anova (mut.model)#
-	return (p.anova$'Pr(>F)'[4])#
-}#
-#
-if (n.subtypes > 1) {#
-	no_cores <- detectCores() - 1#
-	cl <- makeCluster(no_cores, type = "FORK")#
-	t.mut.data <- cbind(t.mut.data, p = parApply (cl, t.mut.data, 1, test.all, score, nmuts, gender, age, subtype))#
-	stopCluster (cl)#
-	t.mut.data <- cbind(t.mut.data, FDR = p.adjust (t.mut.data[,"p"], method = "fdr"))#
-} else {#
-	if (args[3] == "OV" | args[3] == "TGCT" | args[3] == "UCS" | args[3] == "PRAD") {#
-		no_cores <- detectCores() - 1#
-		cl <- makeCluster(no_cores, type = "FORK")#
-		t.mut.data <- cbind(t.mut.data, p = parApply (cl, t.mut.data, 1, test.ov, score, nmuts, age))#
-		stopCluster (cl)#
-		t.mut.data <- cbind(t.mut.data, FDR = p.adjust (t.mut.data[,"p"], method = "fdr"))#
-	} else {#
-		no_cores <- detectCores() - 1#
-		cl <- makeCluster(no_cores, type = "FORK")#
-		t.mut.data <- cbind(t.mut.data, p = parApply (cl, t.mut.data, 1, test.no.subtype, score, nmuts, gender, age))#
-		stopCluster (cl)#
-		t.mut.data <- cbind(t.mut.data, FDR = p.adjust (t.mut.data[,"p"], method = "fdr"))#
-	}#
-}
-head (t.mut.data)
-mut.data <- read.table ("thomas/review_proteins_positions/final_figures/raw_files/matrix_pancan.txt", sep = "\t", header = TRUE)
-nrow(subset (mut.data, NPat > 4 & AllDriver == "No" & MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected >2))
-sub.sig <- nrow(subset (mut.data, NPat > 4 & AllDriver == "No" & MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected >2))
 head (sub.sig [,!(c ("NPat"))])
 head (sub.sig [-which (names (sub.sig) %in% c ("NPat", "KnownDriver", "Mode", "AllDriver", "OncodriveFM", "MutSigCV"))])
 head (sub.sig)
@@ -1022,188 +96,736 @@ plot.1 <- ggplot (subset (sub.analyze, value < 0.05), aes (x = variable, fill = 
 plot.2 <- ggplot (subset (m.res, nDetOG > 0 & Tissue == "Pancan"), aes (x = Method, y = OR)) + geom_bar (stat = "identity", aes (alpha = sig, fill = sig), color = "black") + theme (axis.text.x = element_text (angle = 45, hjust = 1)) + geom_hline (yintercept = 1, linetype = 2, color = "black") + theme (panel.background = element_blank(), axis.text = element_text (color = "black"), axis.ticks = element_line (color = "black"), axis.line.x = element_line (color = "black"), axis.line.y = element_line (color = "black"), axis.title.x = element_blank(), axis.title.y = element_text (face = "italic"), legend.position = "right") + ylab ("Oncogene/dual role\n fold enrichment\n") + scale_alpha_manual (values = c (0.3, 1), name = "p < 0.05") + scale_fill_manual (values = c ("lightgray", "#FFBB00"), name = "p < 0.05")#
 grid.arrange (plot.1, plot.2, ncol = 1, heights = c (5,3))
 mut.data <- read.table ("github/sub-gene_resolution/raw_data/matrix_blca.txt", sep = "\t", header = TRUE, check.names = FALSE)
-head (mut.data)
-dim (mut.data)
+dim (sub.4)
 write.table (sub.4, "github/sub-gene_resolution/raw_data/blca_matrix.txt", sep = "\t", quote=FALSE, row.names=FALSE, col.names=TRUE)
+mut.data <- read.table ("github/sub-gene_resolution/previous/matrix_brca.txt", sep = "\t", header = TRUE, check.names = FALSE)
 write.table (sub.4, "github/sub-gene_resolution/raw_data/brca_matrix.txt", sep = "\t", quote=FALSE, row.names=FALSE, col.names=TRUE)
 mut.data <- read.table ("github/sub-gene_resolution/previous/matrix_gbm.txt", sep = "\t", header = TRUE, check.names = FALSE)
 write.table (sub.4, "github/sub-gene_resolution/raw_data/matrix_gbm.txt", sep = "\t", quote=FALSE, row.names=FALSE, col.names=TRUE)
 mut.data <- read.table ("github/sub-gene_resolution/previous/matrix_luad.txt", sep = "\t", header = TRUE, check.names = FALSE)
 write.table (sub.4, "github/sub-gene_resolution/raw_data/matrix_luad.txt", sep = "\t", quote=FALSE, row.names=FALSE, col.names=TRUE)
-mut.data <- read.table ("github/sub-gene_resolution/previous/matrix_brca.txt", sep = "\t", header = TRUE, check.names = FALSE)
-mut.data <- read.table ("../previous/matrix_brca.txt", sep = "\t", header = TRUE, check.names = FALSE)
+write.table (sub.4, file = "github/sub-gene_resolution/raw_data/matrix_pancan.txt", sep = "\t", row.names=FALSE, quote=FALSE, col.names=TRUE)
+dim (mut.data)
+head (mut.data)
+head (subset (mut.data, KnownDriver == "Yes"))
+sub.st1 <- subset (mut.data, KnownDriver == "No" & AllDriver == "Missense somatic drivers in other tissues")
+sub.st1 <- subset (mut.data, KnownDriver == "No" & AllDriver == "Missense somatic drivers in other tissues" & MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 0)
+dim (st1)
+sub.st2 <- subset (mut.data, KnownDriver == "No" & AllDriver == "No" & MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 0)
+head (sub.st2)
+dim (st2)
+dim (sub.st2)
+write.table (sub.st2, file = "github/sub-gene_resolution/Supp_Tables/Supplementary_Table_2.txt", sep = "\t", quote=FALSE, row.names=FALSE, col.names=TRUE)
+mut.data <- read.table ("github/sub-gene_resolution/raw_data/matrix_pancan.txt", sep = "\t", header = TRUE, check.names = FALSE)
 sub.4 <- subset (mut.data, NPat > 4)
-write.table (sub.4, "../raw_data/matrix_brca.txt", sep = "\t", quote=FALSE, row.names=FALSE, col.names=TRUE)
+sub.st1 <- subset (mut.data, KnownDriver == "No" & AllDriver != "No" & MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 0)
+dim (sub.st1)
+write.table (sub.st1, file = "github/sub-gene_resolution/Supp_Tables/Supplementary_Table_1.txt", sep = "\t", quote=FALSE, row.names=FALSE, col.names=TRUE)
+subset (sub.st1, Gene == "CSNK2A")
+subset (sub.st1, Gene == "CSNK2A1")
+head (sub.st1)
+sub.st2 <- subset (mut.data, KnownDriver == "No" & AllDriver == "No" & MutSigCV > 0.05 & OncodriveFM > 0.05 & Detected > 2)
+subset (sub.st2, Gene == "CSNK2A1")
+subset (sub.st2, Gene == "PARP4")
+pca.data <- read.table ("thomas/review_proteins_positions/final_figures/raw_files/matrix_pca_blca.txt", sep = "\t", header = TRUE, row.names = 1)
+head (pca.data)
+pca.data
+cib.data <- read.table ("grants/Beatriu de Pinos/CIB_race_LUAD.txt", sep = "\t", header = TRUE)
+cib.data <- as.matrix (cib.data)
+head (cib.bk)
+head (cib.data)
+cib.bk <- cib.data[,4:ncol(cib.data)]
+cib.bk <- as.matrix (cib.bk)
+cib.prcomp <- prcomp (cib.bk, center = TRUE, scale = TRUE)
+cib.pca <- cbind (cib.data, cib.prcomp$x)
+ggplot (cib.pca, aes (x = PC1, y = PC2)) + geom_point (aes (color = Ethnicity))
+ggplot (cib.pca, aes (x = PC1, y = PC2)) + geom_point (aes (color = Ethnicity)) + scale_color_manual (values = c ("black", "red", "blue", "green"))
+cib.data <- read.table ("grants/Beatriu de Pinos/CIB_race_LUAD.txt", sep = "\t", header = TRUE, row.names = 1)
+cib.data <- read.table ("grants/Beatriu de Pinos/CIB_race_LUAD.txt", sep = "\t", header = TRUE, row.names = 1)#
+cib.bk <- cib.data[,4:ncol(cib.data)]#
+cib.bk <- as.matrix (cib.bk)#
+cib.prcomp <- prcomp (cib.bk, center = TRUE, scale = TRUE)#
+cib.pca <- cbind (cib.data, cib.prcomp$x)#
+ggplot (cib.pca, aes (x = PC1, y = PC2)) + geom_point (aes (color = Ethnicity)) + scale_color_manual (values = c ("black", "red", "blue", "green"))
+cib.data <- read.table ("grants/Beatriu de Pinos/CIB_race_LUAD.txt", sep = "\t", header = TRUE, row.names = 1)#
+cib.bk <- cib.data[,4:ncol(cib.data)]#
+cib.bk <- as.matrix (cib.bk)#
+cib.prcomp <- prcomp (cib.bk, center = TRUE, scale = TRUE)#
+cib.pca <- cbind (cib.data, cib.prcomp$x)#
+ggplot (cib.pca, aes (x = PC1, y = PC2)) + geom_point (aes (color = Ethnicity)) + scale_color_manual (values = c ("black", "red", "green"))
+cib.data <- read.table ("grants/Beatriu de Pinos/CIB_race_LUAD.txt", sep = "\t", header = TRUE, row.names = 1)#
+cib.bk <- cib.data[,4:ncol(cib.data)]#
+cib.bk <- as.matrix (cib.bk)#
+cib.prcomp <- prcomp (cib.bk, center = TRUE, scale = TRUE)#
+cib.pca <- cbind (cib.data, cib.prcomp$x)#
+ggplot (cib.pca, aes (x = PC1, y = PC2)) + geom_point (aes (color = Gender))
+dim (cub.pca)
+dim (cib.pca)
+cib.data <- read.table ("grants/Beatriu de Pinos/CIB_race_LUAD.txt", sep = "\t", header = TRUE, row.names = 1)#
+cib.bk <- cib.data[,4:ncol(cib.data)]#
+cib.bk <- as.matrix (cib.bk)#
+cib.prcomp <- prcomp (cib.bk, center = TRUE, scale = TRUE)#
+cib.pca <- cbind (cib.data, cib.prcomp$x)#
+ggplot (cib.pca, aes (x = PC1, y = PC2)) + geom_point (aes (color = Ethnicity)) + scale_color_manual (values = c ("black", "red", "green", "black"))
+cib.data <- read.table ("grants/Beatriu de Pinos/CIB_race_LUAD.txt", sep = "\t", header = TRUE, row.names = 1)#
+cib.bk <- cib.data[,4:ncol(cib.data)]#
+cib.bk <- as.matrix (cib.bk)#
+cib.prcomp <- prcomp (prop.table(cib.bk,2), center = TRUE, scale = TRUE)#
+cib.pca <- cbind (cib.data, cib.prcomp$x)#
+ggplot (cib.pca, aes (x = PC1, y = PC2)) + geom_point (aes (color = Ethnicity))
+cib.data <- read.table ("grants/Beatriu de Pinos/CIB_race_LUAD.txt", sep = "\t", header = TRUE, row.names = 1)#
+cib.bk <- cib.data[,4:ncol(cib.data)]#
+cib.bk <- as.matrix (cib.bk)#
+cib.prcomp <- prcomp (cib.bk,)#
+cib.pca <- cbind (cib.data, cib.prcomp$x)#
+ggplot (cib.pca, aes (x = PC1, y = PC2)) + geom_point (aes (color = Ethnicity))
+cib.data <- read.table ("grants/Beatriu de Pinos/CIB_race_LUAD.txt", sep = "\t", header = TRUE, row.names = 1)#
+cib.bk <- cib.data[,4:ncol(cib.data)]#
+cib.bk <- as.matrix (cib.bk)#
+cib.prcomp <- prcomp (cib.bk, center = TRUE, scale = TRUE)#
+cib.pca <- cbind (cib.data, cib.prcomp$x)#
+ggplot (cib.pca, aes (x = PC1, y = PC2)) + geom_point (aes (color = Ethnicity))
+75*9
+2/675
+2/675 * 100
+30/60000*100
+130/127*100
+130/127000*100
+install.packages ("UpsetR")
+install.packages ("UpSetR")
+movies <- read.csv(system.file("extdata", "movies.csv", package = "UpSetR"), #
+    header = T, sep = ";")
+head (movies)
+library *UpSetR
+library (UpSetR)
+upset (movies)
+networks <- read.table ("Eyras/response_reviewers/results/overlap_all_networks.txt", sep = "\t", header = TRUE, row.names = 1)
+upset (networks)
+20477 + 2641 + 507 + 215 + 46 + 6105
+2*(20477 + 2641 + 507 + 215 + 46 + 6105)
+networks <- read.table ("Eyras/response_reviewers/results/comparison_STRING_scores.txt", sep = "\t", header = TRUE)
+head (networks)
+ggplot (networks, aes (x = Included, y = Score)) + geom_violin ()
+ggplot (networks, aes (x = Included, y = Score)) + geom_violin () + geom_point (position = position_jitter (width = 0.3), size = 0.05)
+ggplot (networks, aes (x = Included, y = Score)) + geom_violin () + theme (axis.text = element_text (color = "black"), axis.line.x = element_line (color = "black"), axis.line.y = element_line (color = "black"), axis.ticks = element_line (color = "black"), panel.background = element_blank(), axis.title.x = element_blank(), axis.title.y = element_text (face = "italic")) + ylab ("STRING score\n")
+ggplot (networks, aes (x = Included, y = Score)) + geom_violin (aes (fill = Included)) + theme (axis.text = element_text (color = "black"), axis.line.x = element_line (color = "black"), axis.line.y = element_line (color = "black"), axis.ticks = element_line (color = "black"), panel.background = element_blank(), axis.title.x = element_blank(), axis.title.y = element_text (face = "italic")) + ylab ("STRING score\n") + scale_fill_manual (values = c ("orange", "gray"))
+ggplot (networks, aes (x = Included, y = Score)) + geom_violin (aes (fill = Included)) + theme (axis.text = element_text (color = "black"), axis.line.x = element_line (color = "black"), axis.line.y = element_line (color = "black"), axis.ticks = element_line (color = "black"), panel.background = element_blank(), axis.title.x = element_blank(), axis.title.y = element_text (face = "italic"), legend.position = "none") + ylab ("STRING score\n") + scale_fill_manual (values = c ("orange", "gray"))
+mut.data <- read.table ("TCGA/neutral_evolution/data/TCGA_MC3.txt", sep = "\t", header = TRUE)
+samples <- unique (mut.data$Sample)#
+#
+res.af <- data.frame (Sample = samples, Tissue = NA, Purity = NA, Immunity = NA, R2 = NA, mu = NA, nmut.range = NA, nmut.private = NA, nmut.clonal = NA)#
+#
+for (i in 1:length(samples)) {#
+	sub.sample <- subset (mut.data, Sample == as.character (samples[i]))#
+	purity <- max(sub.sample$Purity)#
+	immunity <- max (sub.sample$Immune)#
+	sub.sample$AFadj <- (sub.sample$NReadsMut/sub.sample$NreadsTotal)/purity#
+	sub.analyze <- subset (sub.sample, AFadj > 0.12 & AFadj < 0.24)#
+	res.af[i,1] <- as.character (samples[i])#
+	res.af[i,2] <- as.character(sub.sample$Tissue[1])#
+	res.af[i,3] <- purity#
+	res.af[i,4] <- immunity#
+#
+	if (nrow (sub.analyze) > 12) {#
+		max.af <- max (sub.analyze$AFadj)#
+		dist.mut <- ecdf (1/sub.analyze$AFadj)#
+		sub.analyze$Cum <- dist.mut(1/sub.analyze$AFadj) * nrow (sub.analyze)#
+		sub.analyze$Inv <- 1/sub.analyze$AFadj - 1/max.af#
+		res <- summary (lm (Cum ~ Inv + 0, data = sub.analyze))#
+		res.af[i,5] <- res$r.squared#
+		res.af[i,6] <- res$coefficients[1,1]#
+	}#
+	else {	#
+		res.af[i,5] <- "NA"#
+		res.af[i,6] <- "NA"#
+	}#
+	res.af[i,7] <- nrow (sub.analyze)#
+	res.af[i,8] <- nrow (subset (sub.sample, AF <= 0.12))#
+	res.af[i,9] <- nrow (subset (sub.sample, AF >= 0.24))#
+}
+head (samples)
+res.af <- data.frame (Sample = samples, Tissue = NA, Purity = NA, Immunity = NA, R2 = NA, mu = NA, nmut.range = NA, nmut.private = NA, nmut.clonal = NA)
+for (i in 1:length(samples)) {#
+	sub.sample <- subset (mut.data, Sample == as.character (samples[i]))#
+	purity <- max(sub.sample$Purity)#
+	immunity <- max (sub.sample$Immune)#
+	sub.sample$AFadj <- (sub.sample$NReadsMut/sub.sample$NreadsTotal)/purity#
+	sub.analyze <- subset (sub.sample, AFadj > 0.12 & AFadj < 0.24)#
+	res.af[i,1] <- as.character (samples[i])#
+	res.af[i,2] <- as.character(sub.sample$Tissue[1])#
+	res.af[i,3] <- purity#
+	res.af[i,4] <- immunity#
+#
+	if (nrow (sub.analyze) > 12) {#
+		max.af <- max (sub.analyze$AFadj)#
+		dist.mut <- ecdf (1/sub.analyze$AFadj)#
+		sub.analyze$Cum <- dist.mut(1/sub.analyze$AFadj) * nrow (sub.analyze)#
+		sub.analyze$Inv <- 1/sub.analyze$AFadj - 1/max.af#
+		res <- summary (lm (Cum ~ Inv + 0, data = sub.analyze))#
+		res.af[i,5] <- res$r.squared#
+		res.af[i,6] <- res$coefficients[1,1]#
+	}#
+	else {	#
+		res.af[i,5] <- "NA"#
+		res.af[i,6] <- "NA"#
+	}#
+	res.af[i,7] <- nrow (sub.analyze)#
+	res.af[i,8] <- nrow (subset (sub.sample, AF <= 0.12))#
+	res.af[i,9] <- nrow (subset (sub.sample, AF >= 0.24))#
+}
+sub.sample$AFadj <- mapply(sub.sample$NReadsMut/sub.sample$NreadsTotal)/purity)
+sub.sample$AFadj <- mapply((sub.sample$NReadsMut/sub.sample$NreadsTotal)/purity)
+sub.sample$AF <- sub.sample$NReadsMut/sub.sample$NreadsTotal
+for (i in 1:length(samples)) {#
+	sub.sample <- subset (mut.data, Sample == as.character (samples[i]))#
+	sub.sample$AFadj <- 0#
+	purity <- max(sub.sample$Purity)#
+	immunity <- max (sub.sample$Immune)#
+	sub.sample$AFadj <- (sub.sample$NReadsMut/sub.sample$NreadsTotal)/purity#
+	sub.analyze <- subset (sub.sample, AFadj > 0.12 & AFadj < 0.24)#
+	res.af[i,1] <- as.character (samples[i])#
+	res.af[i,2] <- as.character(sub.sample$Tissue[1])#
+	res.af[i,3] <- purity#
+	res.af[i,4] <- immunity#
+#
+	if (nrow (sub.analyze) > 12) {#
+		max.af <- max (sub.analyze$AFadj)#
+		dist.mut <- ecdf (1/sub.analyze$AFadj)#
+		sub.analyze$Cum <- dist.mut(1/sub.analyze$AFadj) * nrow (sub.analyze)#
+		sub.analyze$Inv <- 1/sub.analyze$AFadj - 1/max.af#
+		res <- summary (lm (Cum ~ Inv + 0, data = sub.analyze))#
+		res.af[i,5] <- res$r.squared#
+		res.af[i,6] <- res$coefficients[1,1]#
+	}#
+	else {	#
+		res.af[i,5] <- "NA"#
+		res.af[i,6] <- "NA"#
+	}#
+	res.af[i,7] <- nrow (sub.analyze)#
+	res.af[i,8] <- nrow (subset (sub.sample, AF <= 0.12))#
+	res.af[i,9] <- nrow (subset (sub.sample, AF >= 0.24))#
+}
+sub.sample$AFadj <- (sub.sample$NReadsMut/sub.sample$NreadsTotal)/purity
+sub.sample$AFadj <- sub.sample$NReadsMut/sub.sample$NreadsTotal
+sub.sample$AFadj <- (sub.sample$NReadsMut/sub.sample$NReadsTotal)/Purity
+sub.sample$AFadj <- (sub.sample$NReadsMut/sub.sample$NReadsTotal)/sub.sample$Purity
+head (sub.sample)
+samples <- unique (mut.data$Sample)#
+#
+res.af <- data.frame (Sample = samples, Tissue = NA, Purity = NA, Immunity = NA, R2 = NA, mu = NA, nmut.range = NA, nmut.private = NA, nmut.clonal = NA)#
+#
+for (i in 1:length(samples)) {#
+	sub.sample <- subset (mut.data, Sample == as.character (samples[i]))#
+	purity <- max(sub.sample$Purity)#
+	immunity <- max (sub.sample$Immune)#
+	sub.sample$AFadj <- (sub.sample$NReadsMut/sub.sample$NReadsTotal)/sub.sample$Purity#
+	sub.analyze <- subset (sub.sample, AFadj > 0.12 & AFadj < 0.24)#
+	res.af[i,1] <- as.character (samples[i])#
+	res.af[i,2] <- as.character(sub.sample$Tissue[1])#
+	res.af[i,3] <- purity#
+	res.af[i,4] <- immunity#
+#
+	if (nrow (sub.analyze) > 12) {#
+		max.af <- max (sub.analyze$AFadj)#
+		dist.mut <- ecdf (1/sub.analyze$AFadj)#
+		sub.analyze$Cum <- dist.mut(1/sub.analyze$AFadj) * nrow (sub.analyze)#
+		sub.analyze$Inv <- 1/sub.analyze$AFadj - 1/max.af#
+		res <- summary (lm (Cum ~ Inv + 0, data = sub.analyze))#
+		res.af[i,5] <- res$r.squared#
+		res.af[i,6] <- res$coefficients[1,1]#
+	}#
+	else {	#
+		res.af[i,5] <- "NA"#
+		res.af[i,6] <- "NA"#
+	}#
+	res.af[i,7] <- nrow (sub.analyze)#
+	res.af[i,8] <- nrow (subset (sub.sample, AF <= 0.12))#
+	res.af[i,9] <- nrow (subset (sub.sample, AF >= 0.24))#
+}
+samples <- unique (mut.data$Sample)#
+#
+res.af <- data.frame (Sample = samples, Tissue = NA, Purity = NA, Immunity = NA, R2 = NA, mu = NA, nmut.range = NA, nmut.private = NA, nmut.clonal = NA)#
+#
+for (i in 1:length(samples)) {#
+	sub.sample <- subset (mut.data, Sample == as.character (samples[i]))#
+	purity <- max(sub.sample$Purity)#
+	immunity <- max (sub.sample$Immune)#
+	sub.sample$AFadj <- (sub.sample$NReadsMut/sub.sample$NReadsTotal)/sub.sample$Purity#
+	sub.analyze <- subset (sub.sample, AFadj > 0.12 & AFadj < 0.24)#
+	res.af[i,1] <- as.character (samples[i])#
+	res.af[i,2] <- as.character(sub.sample$Tissue[1])#
+	res.af[i,3] <- purity#
+	res.af[i,4] <- immunity#
+#
+	if (nrow (sub.analyze) > 12) {#
+		max.af <- max (sub.analyze$AFadj)#
+		dist.mut <- ecdf (1/sub.analyze$AFadj)#
+		sub.analyze$Cum <- dist.mut(1/sub.analyze$AFadj) * nrow (sub.analyze)#
+		sub.analyze$Inv <- 1/sub.analyze$AFadj - 1/max.af#
+		res <- summary (lm (Cum ~ Inv + 0, data = sub.analyze))#
+		res.af[i,5] <- res$r.squared#
+		res.af[i,6] <- res$coefficients[1,1]#
+	}#
+	else {	#
+		res.af[i,5] <- "NA"#
+		res.af[i,6] <- "NA"#
+	}#
+	res.af[i,7] <- nrow (sub.analyze)#
+	res.af[i,8] <- nrow (subset (sub.sample, AFadj <= 0.12))#
+	res.af[i,9] <- nrow (subset (sub.sample, AFadj >= 0.24))#
+}
+write.table (res.af, file = "TCGA/neutral_evolution/results/results_MC3_adjusted_frequency.txt", quote=FALSE, row.names = FALSE, col.names = TRUE)
+res.af$Group <- ifelse (res.af$R2 > 0.98, "Neutral", "Not neutral")
+ggplot (res.af, aes (x = Tissue, y = Immunity)) + geom_violin (aes(fill = Group))
+ggplot (res.af, aes (x = Tissue, y = Immunity)) + geom_boxplot (aes(fill = Group))
+Anova (lm (Immunity ~ Tissue + Group, data = res.af))
+summary (lm (Immunity ~ Tissue + Group, data = res.af))
+head (res.af)
+ggplot (subset (res.af, R2 != 'NA'), aes (x = Tissue, y = Immunity)) + geom_boxplot (aes(fill = Group))
+Anova (lm (Immunity ~ Tissue + Group, data = subset (res.af, R2 != "NA")))
+summary (lm (Immunity ~ Tissue + Group, data = subset (res.af, R2 != "NA")))
+write.table (subset (res.af, R2 != "NA"), file = "TCGA/neutral_evolution/results/results_MC3_adjusted_frequency.txt", quote=FALSE, row.names = FALSE, col.names = TRUE)
+require (ggplot2)#
+require (reshape)#
+require (gridExtra)#
+require (gplots)#
+require (grid)#
+require (scales)
+neu.data$Group <- ifelse (neu.data$R2_kan == "NA", neu.data$R2_kan, ifelse (neu.data$R2_kan > 0.98, "Neutral", "Not neutral"))#
+#
+all.tissues <- data.frame (Tissue = unique (neu.data$Tissue), Analysis = 0)#
+analysis.tissues <- all.tissues#
+#
+for (i in 1:nrow(all.tissues)) {#
+	sub.t <- subset (neu.data, Tissue == as.character(analysis.tissues[i,1]) & R2_kan != "NA" & Purity > 0.5)#
+	if (nrow (subset (sub.t, Group == "Neutral")) > 4) {#
+		all.tissues[i,2] <- 1#
+	}#
+}#
+#
+sub.analyze <- subset (neu.data, Tissue %in% subset (all.tissues$Tissue, all.tissues$Analysis == 1) & R2_kan != "NA"  & Purity > 0.5) #3314 samples#
+sub.analyze$ClonFrac <- sub.analyze$NMutsClon/(sub.analyze$NMutsInt + sub.analyze$NMutsPriv + sub.analyze$NMutsClon)#
+sub.analyze$TotalMuts <- sub.analyze$NMutsInt + sub.analyze$NMutsPriv + sub.analyze$NMutsClon
+neu.data$Group <- ifelse (neu.data$R2 == "NA", neu.data$R2, ifelse (neu.data$R2 > 0.98, "Neutral", "Not neutral"))#
+#
+all.tissues <- data.frame (Tissue = unique (neu.data$Tissue), Analysis = 0)#
+analysis.tissues <- all.tissues#
+#
+for (i in 1:nrow(all.tissues)) {#
+	sub.t <- subset (neu.data, Tissue == as.character(analysis.tissues[i,1]) & R2 != "NA" & Purity > 0.5)#
+	if (nrow (subset (sub.t, Group == "Neutral")) > 4) {#
+		all.tissues[i,2] <- 1#
+	}#
+}#
+#
+sub.analyze <- subset (neu.data, Tissue %in% subset (all.tissues$Tissue, all.tissues$Analysis == 1) & R2 != "NA"  & Purity > 0.5) #3314 samples#
+sub.analyze$ClonFrac <- sub.analyze$NMutsClon/(sub.analyze$NMutsInt + sub.analyze$NMutsPriv + sub.analyze$NMutsClon)#
+sub.analyze$TotalMuts <- sub.analyze$NMutsInt + sub.analyze$NMutsPriv + sub.analyze$NMutsClon
+neu.data <- read.table ("TCGA/neutral_evolution/results/results_MC3_adjusted_frequency.txt", sep = ";", header = TRUE)
+neu.data <- read.table ("TCGA/neutral_evolution/results/results_MC3_adjusted_frequency.txt", sep = " ", header = TRUE)
+neu.data <- read.table ("TCGA/neutral_evolution/results/results_MC3_adjusted_frequency.txt", sep = "\t", header = TRUE)
+neu.data$Group <- ifelse (neu.data$R2_kan == "NA", neu.data$R2_kan, ifelse (neu.data$R2_kan > 0.98, "Neutral", "Not neutral"))
+neu.data$Group <- ifelse (neu.data$R2_kan == "NA", neu.data$R2_kan, ifelse (neu.data$R2_kan > 0.98, "Neutral", "Not neutral"))neu.data$Group <- ifelse (neu.data$R2 == "NA", neu.data$R2, ifelse (neu.data$R2 > 0.98, "Neutral", "Not neutral"))
+neu.data$Group <- ifelse (neu.data$R2 == "NA", neu.data$R2, ifelse (neu.data$R2 > 0.98, "Neutral", "Not neutral"))
+all.tissues <- data.frame (Tissue = unique (neu.data$Tissue), Analysis = 0)#
+analysis.tissues <- all.tissues#
+#
+for (i in 1:nrow(all.tissues)) {#
+	sub.t <- subset (neu.data, Tissue == as.character(analysis.tissues[i,1]) & R2 != "NA" & Purity > 0.5)#
+	if (nrow (subset (sub.t, Group == "Neutral")) > 4) {#
+		all.tissues[i,2] <- 1#
+	}#
+}
+sub.analyze <- subset (neu.data, Tissue %in% subset (all.tissues$Tissue, all.tissues$Analysis == 1) & R2 != "NA"  & Purity > 0.5) #3314 samples
+dim (sub.analyze)
+sub.analyze$ClonFrac <- sub.analyze$NMutsClon/(sub.analyze$NMutsInt + sub.analyze$NMutsPriv + sub.analyze$NMutsClon)
+sub.analyze$ClonFrac <- sub.analyze$nmut.clonal/(sub.analyze$nmut.range + sub.analyze$nmut.private + sub.analyze$nmut.clonal)
+sub.analyze$TotalMuts <- sub.analyze$nmut.range + sub.analyze$nmut.private + sub.analyze$nmut.clonal
+analysis.tissues<- data.frame (Tissue = unique (sub.analyze$Tissue), Fraction = 0)#
+#
+for (i in 1:nrow(analysis.tissues)) {#
+	sub.t <- subset (sub.analyze, Tissue == as.character(analysis.tissues[i,1]))#
+	num.neu <- nrow (subset (sub.t, Group == "Neutral"))#
+	num.not.neu <- nrow (subset (sub.t, Group != "Neutral"))#
+	analysis.tissues[i,2] <- num.neu/num.not.neu#
+}#
+#
+sub.analyze$Tissue <- factor (sub.analyze$Tissue, levels = analysis.tissues[with(analysis.tissues, order (-Fraction)),]$Tissue)
+ggplot (sub.analyze, aes (x = Tissue, fill = Group)) + geom_bar (position = "fill", color = "black") + theme (axis.text = element_text (color = "black"), axis.ticks = element_line (color = "black"), axis.line.x = element_line (color = "black"), axis.line.y = element_line (color = "black"), axis.title.y = element_text (face = "italic"), panel.background = element_blank(), legend.position = "right", axis.text.x = element_text (angle = 45, hjust = 1), axis.title.x = element_blank()) + ylab ("Fraction of samples") + scale_y_continuous (labels = scales::percent) + scale_fill_manual (values = c ("#F62A00", "#4CB5F5")) + geom_hline (yintercept = 0.3, linetype = 2)
+p.estimate <- data.frame (type = unique (sub.analyze$Tissue), p = 1, Mean = 0, y = 3200)#
+#
+for (i in 1:nrow (p.estimate)) {#
+	sub.t <- subset (sub.analyze, Tissue == as.character (p.estimate[i,1]) & R2 != "NA")#
+	if (length (unique (sub.t$Group)) == 1) {#
+		next#
+	}#
+	res <- wilcox.test (sub.t$Immune ~ sub.t$Group)#
+	p.estimate[i,2] <- res$p.value#
+	p.estimate[i,3] <- mean (sub.t$Immune)#
+}#
+#
+p.estimate$Label <- ifelse (p.estimate$p > 0.05, "", ifelse (p.estimate$p > 0.01, "*", ifelse (p.estimate$p > 0.001, "**", "***")))#
+#
+sub.analyze$Tissue <- factor (sub.analyze$Tissue, levels = p.estimate[order(p.estimate$Label, -p.estimate$Mean),]$type)
+head (p.estimate)
+head (sub.t)
+unique (sub.t$Group)
+p.estimate <- data.frame (type = unique (sub.analyze$Tissue), p = 1, Mean = 0, y = 3200)#
+#
+for (i in 1:nrow (p.estimate)) {#
+	sub.t <- subset (sub.analyze, Tissue == as.character (p.estimate[i,1]) & R2 != "NA")#
+	if (length (unique (sub.t$Group)) == 1) {#
+		next#
+	}#
+	res <- wilcox.test (sub.t$Immunity ~ sub.t$Group)#
+	p.estimate[i,2] <- res$p.value#
+	p.estimate[i,3] <- mean (sub.t$Immunity)#
+}#
+#
+p.estimate$Label <- ifelse (p.estimate$p > 0.05, "", ifelse (p.estimate$p > 0.01, "*", ifelse (p.estimate$p > 0.001, "**", "***")))#
+#
+sub.analyze$Tissue <- factor (sub.analyze$Tissue, levels = p.estimate[order(p.estimate$Label, -p.estimate$Mean),]$type)
+ggplot (sub.analyze, aes (x = Tissue, y = Immunity)) + geom_boxplot (outlier.shape = NA, aes(dodge = Group, color = Group)) + geom_point (position = position_jitterdodge (jitter.width = 0.2), aes (color = Group), size = 0.5) + theme (axis.text.y = element_text (color = "black"), axis.ticks.y = element_line (color = "black"), axis.line.y = element_line (color = "black"), axis.ticks.x = element_blank(), axis.text.x = element_blank(), axis.line.x = element_line (color = "black"), legend.position = "none", panel.background = element_blank(), axis.title.x = element_blank(), axis.title.y = element_text (face = "italic")) + ylab ("ESTIMATE\nImmunity score") + scale_color_manual (values = c ("#F62A00", "#4CB5F5")) + geom_text (data = subset(p.estimate, p > 0.05), aes (x = type, y = y, label = Label), size = 3) + geom_text (data = subset(p.estimate, p < 0.05), aes (x = type, y = y, label = Label), size = 5) + ylim (-2000, 3500)
+p.enrich <- data.frame (type = unique (sub.analyze$Tissue), p = 1, OR = 0)#
+#
+for (i in 1:nrow (p.enrich)) {#
+	sub.t <- subset (sub.analyze, Tissue == as.character (p.enrich[i,1]))#
+	sub.t$ImmGroup <- ifelse (sub.t$Immunity > quantile (sub.t$Immunity)[4], "High", "Low")#
+	m <- matrix (nrow = 2, ncol = 2, 0)#
+	m[1,1] <- nrow (subset (sub.t, ImmGroup == "High" & Group == "Neutral"))#
+	m[1,2] <- nrow (subset (sub.t, ImmGroup == "High")) - m[1,1]#
+	m[2,1] <- nrow (subset (sub.t, Group == "Neutral")) - m[1,1]#
+	m[2,2] <- nrow (sub.t) - sum (m)#
+	res.m <- fisher.test (m)#
+	p.enrich[i,2] <- res.m$p.value#
+	p.enrich[i,3] <- res.m$estimate#
+}#
+#
+p.enrich$Label <- ifelse (p.enrich$p > 0.05, "", ifelse (p.enrich$p > 0.01, "*", ifelse (p.enrich$p > 0.001, "**", "***")))#
+#
+ggplot (p.enrich, aes (x = type, y = OR)) + geom_bar (stat = "identity") + ylim (0,8) + geom_hline (yintercept = 1, linetype = 2) + geom_text (data = subset (p.enrich, p < 0.05), aes (label = Label, x = type, y = OR + 1))
+ggplot (neu.data, aes (x = mu, y = Immunity)) + geom_point () + facet_wrap (~Group)
+ggplot (neu.data, aes (x = mu, y = Immunity)) + geom_point () + facet_wrap (~Group) + scale_x_log10 ()
+library (car)
+Anova (lm (Immunity ~ Tissue + Group, data = subset (neu.data, R2 != "NA")))
+Anova (lm (Immunity ~ Tissue + mu + Group, data = subset (neu.data, R2 != "NA")))
+Anova (lm (Immunity ~ Tissue + mu + Group + ClonFrac, data = subset (neu.data, R2 != "NA")))
+head (neu.data)
+head (sub.analyze)
+Anova (lm (Immunity ~ Tissue + mu + Group, data = subset (sub.analyze, R2 != "NA")))
+Anova (lm (Immunity ~ Tissue + mu + Group + ClonFrac, data = subset (sub.analyze, R2 != "NA")))
+ggplot (sub.analyze, aes (x = mu, y = Immunity)) + geom_point () + facet_grid (Tissue~Group) + scale_x_log10 ()
+ggplot (sub.analyze, aes (x = mu, y = Immunity)) + geom_point () + facet_grid (Tissue~Group, scales = "free") + scale_x_log10 ()
+ggplot (sub.analyze, aes (x = ClonFrac, y = Immunity)) + geom_point () + facet_grid (Tissue~Group, scales = "free") + scale_x_log10 ()
+ggplot (sub.analyze, aes (x = ClonFrac, y = Immunity)) + geom_point () + facet_grid (Tissue~Group, scales = "free")
+Anova (lm (ClonFrac ~ Tissue + mu + Group, data = subset (sub.analyze, R2 != "NA")))
+ggplot (sub.analyze, aes (x = Tissue, y = ClonFrac)) + geom_boxplot (outlier.shape = NA, aes(dodge = Group, color = Group)) + geom_point (position = position_jitterdodge (jitter.width = 0.2), aes (color = Group), size = 0.5) + theme (axis.text.y = element_text (color = "black"), axis.ticks.y = element_line (color = "black"), axis.line.y = element_line (color = "black"), axis.ticks.x = element_blank(), axis.text.x = element_blank(), axis.line.x = element_line (color = "black"), legend.position = "none", panel.background = element_blank(), axis.title.x = element_blank(), axis.title.y = element_text (face = "italic")) + ylab ("ESTIMATE\nImmunity score") + scale_color_manual (values = c ("#F62A00", "#4CB5F5")) + geom_text (data = subset(p.estimate, p > 0.05), aes (x = type, y = y, label = Label), size = 3) + geom_text (data = subset(p.estimate, p < 0.05), aes (x = type, y = y, label = Label), size = 5)
+ggplot (sub.analyze, aes (x = Tissue, y = ClonFrac)) + geom_boxplot (outlier.shape = NA, aes(dodge = Group, color = Group)) + geom_point (position = position_jitterdodge (jitter.width = 0.2), aes (color = Group), size = 0.5) + theme (axis.text.y = element_text (color = "black"), axis.ticks.y = element_line (color = "black"), axis.line.y = element_line (color = "black"), axis.ticks.x = element_blank(), axis.text.x = element_blank(), axis.line.x = element_line (color = "black"), legend.position = "none", panel.background = element_blank(), axis.title.x = element_blank(), axis.title.y = element_text (face = "italic"))
+install.packages ("MicroDatosES")
+install.packages ("MicroDatosEs")
+library(MicroDatosEs)#
+library(ggplot2)#
+library(reshape2)#
+library(magrittr) #%>%#
+library(dplyr)#
+library(scales)
+ees <- ees2010("EES14_WEB")#
+dat <- as.data.frame(ees)#
+rm(ees)
+dat <- mutate(dat, salmes= salbase + comsal + extraorm + phextra)
+dat <- mutate(dat, salmes= SALBASE + COMSAL + EXTRAORM + PHEXTRA)
+dat <- mutate(dat, salmesneto= salmes - cotiza - irpfmes)
+dat <- mutate(dat, salmesneto= SALMES - COTIZA - IRPFMES)
+dat <- mutate(dat, salmesneto= salmes - COTIZA - IRPFMES)
+dat <- mutate(dat, AsSmi = salmes/763.35)
+dat$smi <- cut(dat$AsSmi, #
+                       breaks = c(0,1,2,3,4,5,6,7,8,Inf),#
+                       labels=c("0-1 smi","1-2 smi","2-3 smi","3-4 smi","4-5 smi","5-6 smi","6-7 smi","7-8 smi","> 8 smi"))
+dat <- mutate(dat, total=sum(dat$factotal))
+dat <- mutate(group_by(dat,smi), smifact=sum(factotal))
+dat <- mutate(group_by(dat,smi), smifact=sum(FACTOTAL))
+dat <- mutate(dat,pcsmi=100*(smifact/total))
+tc <- subset(dat, tipojor == "Tiempo completo")
+tc <- subset(dat, TIPOJOR == "Tiempo completo")
+tc <- mutate(group_by(tc,smi), smifacttc=sum(factotal))
+tc <- mutate(group_by(tc,smi), smifacttc=sum(FACTOTAL))
+tc <- mutate(tc,tcpcsmi=100*(smifacttc/total))
+dat <- mutate(group_by(dat,tipojor), smifacttipoj=sum(factotal)) #etc
+dat <- mutate(group_by(dat,TIPOJOR), smifacttipoj=sum(FACTOTAL)) #etc
+ggplot(dat, aes( x=smi, y=pcsmi)) + geom_bar ()
+ggplot(dat, aes( x=smi, y=pcsmi)) + geom_bar (stat = "identity")
+head (data)
+library(MicroDatosEs)#
+library(ggplot2)#
+library(reshape2)#
+library(magrittr) #%>%#
+library(dplyr)#
+library(scales)#
+#
+#Encuesta Cuatrienal Salarial 2014#
+ees <- ees2010("EES14_WEB")#
+dat <- as.data.frame(ees)#
+rm(ees)#
+#
+#Salario mensual#
+#
+dat <- mutate(dat, salmes= SALBASE + COMSAL + EXTRAORM + PHEXTRA)#
+#
+#Salario neto#
+#
+dat <- mutate(dat, salmesneto= salmes - COTIZA - IRPFMES)#
+#
+#Smi 2014= (654.30*14)/12 = 763.35#
+#
+dat <- mutate(dat, AsSmi = salmes/763.35)#
+#
+#Añado factores para graficar#
+#
+dat$smi <- cut(dat$AsSmi, #
+                       breaks = c(0,1,2,3,4,5,6,7,8,Inf),#
+                       labels=c("0-1 smi","1-2 smi","2-3 smi","3-4 smi","4-5 smi","5-6 smi","6-7 smi","7-8 smi","> 8 smi"))#
+#
+#Elevación#
+#
+    #Asalariados totales#
+dat <- mutate(dat, total=sum(dat$FACTOTAL))#
+    #Asalariados totales por intervalo smi#
+dat <- mutate(group_by(dat,smi), smifact=sum(FACTOTAL))#
+    #Porcentaje por cada grupo smi#
+dat <- mutate(dat,pcsmi=100*(smifact/total)) #
+#
+#Tiempo completo#
+#
+tc <- subset(dat, tipojor == "Tiempo completo")#
+      #Asalariados totales por intervalo smi a tc#
+tc <- mutate(group_by(tc,smi), smifacttc=sum(FACTOTAL))#
+      #Porcentaje por cada grupo smi#
+tc <- mutate(tc,tcpcsmi=100*(smifacttc/total))#
+#
+#Alternativamente#
+dat <- mutate(group_by(dat,TIPOJOR), smifacttipoj=sum(FACTOTAL)) #etc#
+#
+#Gráfico de barras de los totales#
+#
+p <- ggplot(dat, aes( x=smi, y=pcsmi))#
+p <- p + geom_bar(width=.6,stat="identity") + xlab("") + ylab("% de asalariados")#
+p <- p + scale_y_continuous(labels= comma)
+library(MicroDatosEs)#
+library(ggplot2)#
+library(reshape2)#
+library(magrittr) #%>%#
+library(dplyr)#
+library(scales)#
+#
+#Encuesta Cuatrienal Salarial 2014#
+ees <- ees2010("EES14_WEB")#
+dat <- as.data.frame(ees)#
+rm(ees)#
+#
+#Salario mensual#
+#
+dat <- mutate(dat, salmes= SALBASE + COMSAL + EXTRAORM + PHEXTRA)#
+#
+#Salario neto#
+#
+dat <- mutate(dat, salmesneto= salmes - COTIZA - IRPFMES)#
+#
+#Smi 2014= (654.30*14)/12 = 763.35#
+#
+dat <- mutate(dat, AsSmi = salmes/763.35)#
+#
+#Añado factores para graficar#
+#
+dat$smi <- cut(dat$AsSmi, #
+                       breaks = c(0,1,2,3,4,5,6,7,8,Inf),#
+                       labels=c("0-1 smi","1-2 smi","2-3 smi","3-4 smi","4-5 smi","5-6 smi","6-7 smi","7-8 smi","> 8 smi"))#
+#
+#Elevación#
+#
+    #Asalariados totales#
+dat <- mutate(dat, total=sum(dat$FACTOTAL))#
+    #Asalariados totales por intervalo smi#
+dat <- mutate(group_by(dat,smi), smifact=sum(FACTOTAL))#
+    #Porcentaje por cada grupo smi#
+dat <- mutate(dat,pcsmi=100*(smifact/total)) #
+#
+#Tiempo completo#
+#
+tc <- subset(dat, TIPOJOR == "Tiempo completo")#
+      #Asalariados totales por intervalo smi a tc#
+tc <- mutate(group_by(tc,smi), smifacttc=sum(FACTOTAL))#
+      #Porcentaje por cada grupo smi#
+tc <- mutate(tc,tcpcsmi=100*(smifacttc/total))#
+#
+#Alternativamente#
+dat <- mutate(group_by(dat,TIPOJOR), smifacttipoj=sum(FACTOTAL)) #etc#
+#
+#Gráfico de barras de los totales#
+#
+p <- ggplot(dat, aes( x=smi, y=pcsmi))#
+p <- p + geom_bar(width=.6,stat="identity") + xlab("") + ylab("% de asalariados")#
+p <- p + scale_y_continuous(labels= comma)
+P
+p
+head (dat)
+ggplot(dat, aes( x=smi, y=pcsmi)) + geom_bar(width=.6,stat="identity") + xlab("") + ylab("% de asalariados")
+head (dat[,c("smi", "pcsmi")])
+ggplot(dat, aes( x=smi, y=pcsmi/100)) + geom_bar(width=.6,stat="identity") + xlab("") + ylab("% de asalariados") + scale_y_continuous (labels = scales::percent)
+dim (dat)
+head (tc)
+dim (tc)
+dat[,c("smi", "pcsmi")]
+df.2 <- unique (dat[,c("smi", "pcsmi")])
+head (df.2)
+dim (df.2)
+ggplot(df.2, aes( x=smi, y=pcsmi)) + geom_bar(width=.6,stat="identity") + xlab("") + ylab("% de asalariados") + scale_y_continuous (labels = scales::percent)
+ggplot(df.2, aes( x=smi, y=pcsmi/100)) + geom_bar(width=.6,stat="identity") + xlab("") + ylab("% de asalariados") + scale_y_continuous (labels = scales::percent)
+df.2
+head (cov.data)
+ggplot (cov.data, aes (x = Coverage)) + geom_histogram (binwidth = 0.01)
+nrow (cov.data)
+nrow (subset cov.data, Coverage > 0)
+nrow (subset (cov.data, Coverage > 0)
+)
+cov.data <- read.table ("thomas/review_proteins_positions/figures_pipeline/percent_protein_covered.txt", sep = "\t")
+colnames (cov.data) <- c ("Protein", "Coverage")
+nrow (subset (cov.data, Coverage > 0)))
+nrow (subset (cov.data, Coverage > 0))
+ggplot (cov.data, aes (x = Coverage)) + geom_histogram (binwidth = 0.05)
+ggplot (cov.data, aes (x = Coverage)) + geom_histogram (binwidth = 0.05) + scale_x_continuous (labels = scales::percent)
+ggplot (cov.data, aes (x = Coverage)) + geom_histogram (binwidth = 0.05, aes (color = Coverage)) + scale_x_continuous (labels = scales::percent) + theme (axis.text = element_text (color = "black"), axis.ticks = element_line (color = "black"), axis.line.x = element_line (color = "black"), axis.line.y = element_line (color = "black"), panel.background = element_blank())
+ggplot (cov.data, aes (x = Coverage)) + geom_histogram (binwidth = 0.05, aes (fill = Coverage)) + scale_x_continuous (labels = scales::percent) + theme (axis.text = element_text (color = "black"), axis.ticks = element_line (color = "black"), axis.line.x = element_line (color = "black"), axis.line.y = element_line (color = "black"), panel.background = element_blank())
+ggplot (cov.data, aes (x = Coverage)) + geom_histogram (binwidth = 0.05, color = "orange") + scale_x_continuous (labels = scales::percent) + theme (axis.text = element_text (color = "black"), axis.ticks = element_line (color = "black"), axis.line.x = element_line (color = "black"), axis.line.y = element_line (color = "black"), panel.background = element_blank())
+ggplot (cov.data, aes (x = Coverage)) + geom_histogram (binwidth = 0.01, fill = "orange") + scale_x_continuous (labels = scales::percent) + theme (axis.text = element_text (color = "black"), axis.ticks = element_line (color = "black"), axis.line.x = element_line (color = "black"), axis.line.y = element_line (color = "black"), panel.background = element_blank())
+ggplot (cov.data, aes (x = Coverage)) + geom_histogram (binwidth = 0.02, fill = "orange") + scale_x_continuous (labels = scales::percent) + theme (axis.text = element_text (color = "black"), axis.ticks = element_line (color = "black"), axis.line.x = element_line (color = "black"), axis.line.y = element_line (color = "black"), panel.background = element_blank())
+ggplot (cov.data, aes (x = Coverage)) + geom_histogram (binwidth = 0.05, fill = "orange") + scale_x_continuous (labels = scales::percent) + theme (axis.text = element_text (color = "black"), axis.ticks = element_line (color = "black"), axis.line.x = element_line (color = "black"), axis.line.y = element_line (color = "black"), panel.background = element_blank())
+ggplot (cov.data, aes (x = Coverage)) + geom_histogram (binwidth = 0.05, fill = "orange") + scale_x_continuous (labels = scales::percent) + theme (axis.text = element_text (color = "black"), axis.ticks = element_line (color = "black"), axis.line.x = element_line (color = "black"), axis.line.y = element_line (color = "black"), panel.background = element_blank()) + ylab ("Number of proteins\n") + xlab ("\nStructural coverage of the protein")
+pipeline.res <- read.table ("thomas/review_proteins_positions/figures_pipeline/matrix_gbm.txt", sep = "\t", header = TRUE, check.names = FALSE)
 library (ggplot2)#
-library (reshape)#
+library (pheatmap)#
+library (reshape2)#
 library (gridExtra)#
+library (gplots)#
+library (ggdendro)#
+library (grid)#
+library (ggrepel)
+pipeline.res$Mode <- factor (pipeline.res$Mode, levels = c ("OG", "TSG", "OG/TSG", "Unk", "N/A"))#
 #
-#THIS IS PART "E" OF THE PLOT#
+#WE SUBSET TO THE FRACTION OF GENES WE WANT#
+#I LIMITED THE PLOT TO GENES DETECTED BY FIVE OR MORE METHODS, OR KNOWN DRIVER GENES IN THAT TISSUE DETECTED AT LEAST ONCE#
+#FEEL FREE TO ADJUST TO ADD OTHER GENES#
+pipe.sig <- subset (pipeline.res, Detected > 3 | (Detected > 0 & KnownDriver != "No"))#
 #
-#THIS IS A FUNCTION THAT EXTRACTS THE LEGEND FROM A GGPLOT#
-#TOOK IT FROM https://github.com/hadley/ggplot2/wiki/Share-a-legend-between-two-ggplot2-graphs#
+#SUBSET ONLY THE PART WE WANT#
+mat.plot <- pipe.sig[,c ("Gene", "MutSigCV", "OncodriveFM", "OncodriveCLUST", "NMC", "MutSig-CL", "e-Driver", "e-Driver3D", "iPAC", "GraphPAC", "SpacePAC", "CLUMPS", "iSIMPRe", "ActiveDriver", "Hotspot", "LowMACA")]#
+mat.melt <- melt (mat.plot)#
 #
-g_legend<-function(a.gplot){#
-  tmp <- ggplot_gtable(ggplot_build(a.gplot))#
-  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")#
-  legend <- tmp$grobs[[leg]]#
-  return(legend)}#
+#BINARIZE THE PREDICTIONS INSTEAD OF P-VALS#
+mat.melt$value <- ifelse (mat.melt$value < 0.05, 1, 0)#
 #
-#BLCA#
+#RE-CREATE THE MATRIX#
+mat.plot <- acast (mat.melt, Gene ~ variable, value.var = "value")#
 #
-pred.data <- read.table (file = "../raw_data/matrix_blca.txt", sep = "\t", header = TRUE, check.names = FALSE)#
-pred.melt <- melt (subset (pred.data, NPat > 4))#
-sub.analyze <- subset (pred.melt, !(variable %in% c ("NPat", "Group", "Detected")))#
+#CALC THE CLUSTERING FOR THE METHODS AND GET THE DENDROGRAM#
+model.meth <- hclust (dist (t(mat.plot)))#
+dhc.meth <- as.dendrogram (model.meth)#
+ddata.meth <- dendro_data (dhc.meth, type = "rectangle")#
+dendro.meth <- ggplot (segment (ddata.meth)) + geom_segment (aes (x = x, y = y, xend = xend, yend = yend)) + theme (panel.background = element_blank(), axis.text = element_blank(), axis.ticks = element_blank(), axis.title = element_blank())#
 #
-sub.analyze$AllDriver <- factor (sub.analyze$AllDriver, levels = c ("Missense somatic drivers in matching tissue",  "Missense somatic drivers in other tissues", "Other somatic drivers in other tissues", "Other somatic drivers in matching tissue", "Other germline drivers in other tissues", "No"))#
-sub.analyze$variable <- factor (sub.analyze$variable, levels = c ("MutSigCV", "OncodriveFM", "Hotspot", "OncodriveCLUST", "NMC", "MutSig-CL", "iSIMPRe", "iPAC", "GraphPAC", "SpacePAC", "CLUMPS", "e-Driver", "ActiveDriver", "LowMACA", "e-Driver3D"))#
+#CALC THE CLUSTERING FOR THE GENES AND GET THE DENDROGRAM#
+model.gene <- hclust (dist (mat.plot))#
+dhc.gene <- as.dendrogram (model.gene)#
+ddata.gene <- dendro_data (dhc.gene, type = "rectangle")#
+dendro.gene <- ggplot (segment (ddata.gene)) + geom_segment (aes (x = -x, y = -y, xend = -xend, yend = -yend)) + theme (panel.background = element_blank(), axis.text = element_blank(), axis.ticks = element_blank(), axis.title = element_blank()) + coord_flip ()#
 #
-sub.blca.plot <- subset (sub.analyze, value < 0.05)#
-blca.plot <- ggplot (sub.blca.plot, aes (x = variable)) + geom_bar (position = "fill", aes (fill = AllDriver), color = "black") + theme (axis.text = element_text (color = "black"), axis.ticks.y = element_line (color = "black"), axis.ticks.x = element_blank(), axis.line.x = element_line (color = "black"), axis.line.y = element_line (color = "black"), panel.background = element_blank(), axis.text.x = element_blank(), legend.position = "none", axis.title = element_blank()) + scale_y_continuous (labels = scales::percent) + scale_fill_manual (values = c ("#FE0000", "orange","#2F496E", "#2988BC", "#5CC5EF", "white"), name = "Known driver role?") + ggtitle ("BLCA") + theme (plot.title = element_text (hjust = 0.5, size = 12, face = "italic"))#
+#RE-ORDER THE GENES#
+pipe.sig$Gene <- factor (pipe.sig$Gene, levels = rev(rownames (mat.plot)[model.gene$order]))#
+pipe.melt <- melt (pipe.sig)#
+pipe.npat <- pipe.melt#
 #
-blca.legend <- ggplot (sub.blca.plot, aes (x = variable)) + geom_bar (position = "fill", aes (fill = AllDriver), color = "black") + theme (axis.text = element_text (color = "black"), axis.ticks = element_line (color = "black"), axis.line.x = element_line (color = "black"), axis.line.y = element_line (color = "black"), panel.background = element_blank(), axis.text.x = element_text (angle = 45, hjust = 1), legend.position = "right", axis.title = element_blank()) + scale_y_continuous (labels = scales::percent) + scale_fill_manual (values = c ("#FE0000", "orange","#2F496E", "#2988BC", "#5CC5EF", "white"), name = "Known driver role?") + ggtitle ("BLCA") + theme (plot.title = element_text (hjust = 0.5, size = 12, face = "italic"))#
-plot.legend <- g_legend (blca.legend)#
+#BINARIZE THE PREDICTIONS INSTEAD OF P-VALS#
+pipe.melt$value <- ifelse (pipe.melt$value < 0.05, "Yes", "No")#
 #
-#NOW BRCA#
+#RE-ORDER THE METHODS#
+methods.sorted <- colnames (mat.plot)[model.meth$order]#
+methods.sorted[16] <- "NPat"#
+methods.sorted[17] <- "Detected"#
+pipe.melt$variable <- factor (pipe.melt$variable, levels = methods.sorted)#
 #
-pred.data <- read.table (file = ".../raw_data/matrix_brca.txt", sep = "\t", header = TRUE, check.names = FALSE)#
-pred.melt <- melt (subset (pred.data, NPat > 4))#
-sub.analyze <- subset (pred.melt, !(variable %in% c ("NPat", "Group", "Detected")))#
+#PREPARE THE PLOTS#
+heat.plot <- ggplot (subset (pipe.melt, !(variable %in% c("NPat", "Detected"))), aes (x = variable, y = Gene)) + geom_tile (aes (fill = value), color = "black") + theme (axis.text = element_text (color = "black"), axis.text.x = element_text (angle = 45, hjust = 1), axis.ticks = element_blank(), axis.line = element_blank(), panel.background = element_blank(), axis.title = element_blank(), legend.position = "none") + scale_fill_manual (name = "Detected", values = c("white", "#FB6542"))#
+npat.plot <- ggplot (subset (pipe.npat, variable == "NPat"), aes (x = Gene, y = value)) + geom_bar (stat = "identity") + coord_flip() + theme (axis.text.y = element_blank(), axis.ticks.y = element_blank(), axis.title = element_blank(), axis.text.x = element_text (color = "black"), axis.ticks.x = element_line (color = "black"), axis.line.x = element_line (color = "black"), panel.background = element_blank())#
+known.plot <- ggplot (pipe.melt, aes (x = "Known driver", y = Gene)) + geom_tile (aes (fill = Mode), color = "black") + theme (axis.text.y = element_blank(), axis.ticks = element_blank(), axis.title = element_blank(), axis.text.x = element_text (color = "black", angle = 45, hjust = 1), legend.position = "none", panel.background = element_blank()) + scale_fill_manual (values = c ("#FFBB00", "#375E97", "#3F681C", "#DDC5A2", "white"))#
+empty.plot <- rectGrob(gp=gpar(col="white"))#
 #
-sub.analyze$AllDriver <- factor (sub.analyze$AllDriver, levels = c ("Missense somatic drivers in matching tissue",  "Missense somatic drivers in other tissues", "Other somatic drivers in other tissues", "Other somatic drivers in matching tissue", "Other germline drivers in other tissues", "No"))#
-sub.analyze$variable <- factor (sub.analyze$variable, levels = c ("MutSigCV", "OncodriveFM", "Hotspot", "OncodriveCLUST", "NMC", "MutSig-CL", "iSIMPRe", "iPAC", "GraphPAC", "SpacePAC", "CLUMPS", "e-Driver", "ActiveDriver", "LowMACA", "e-Driver3D"))#
+#CREATE THE SUMMARY PER CATEGORIES#
+pipeline.back <- pipeline.res#
+pipeline.back$Whole <- apply (pipeline.res[,c("OncodriveFM", "MutSigCV")], 1, min)#
+pipeline.back$TypeI <- apply (pipeline.res[,c("NMC", "OncodriveCLUST", "MutSig-CL", "Hotspot", "iSIMPRe")], 1, min)#
+pipeline.back$TypeII <- apply (pipeline.res[,c("GraphPAC", "iPAC", "SpacePAC", "CLUMPS")], 1, min)#
+pipeline.back$TypeIII <- apply (pipeline.res[,c("ActiveDriver", "e-Driver", "LowMACA")], 1, min)#
+pipeline.back$TypeIV <- pipeline.res$'e-Driver3D'#
 #
-sub.brca.plot <- subset (sub.analyze, value < 0.05)#
-#brca.plot <- ggplot (sub.brca.plot, aes (x = variable)) + geom_bar (position = "fill", aes (fill = AllDriver), color = "black") + theme (axis.text = element_text (color = "black"), axis.ticks = element_line (color = "black"), axis.line.x = element_line (color = "black"), axis.line.y = element_line (color = "black"), panel.background = element_blank(), axis.text.x = element_text (angle = 45, hjust = 1), legend.position = "none", axis.title = element_blank()) + scale_y_continuous (labels = scales::percent) + scale_fill_manual (values = c ("#FE0000", "orange","#2F496E", "#2988BC", "#5CC5EF", "white"), name = "Known driver role?") + ggtitle ("BRCA") + theme (plot.title = element_text (hjust = 0.5, size = 12, face = "italic"))#
-brca.plot <- ggplot (sub.brca.plot, aes (x = variable)) + geom_bar (position = "fill", aes (fill = AllDriver), color = "black") + theme (axis.text = element_text (color = "black"), axis.ticks.y = element_line (color = "black"), axis.ticks.x = element_blank(), axis.line.x = element_line (color = "black"), axis.line.y = element_line (color = "black"), panel.background = element_blank(), axis.text.x = element_blank(), legend.position = "none", axis.title = element_blank()) + scale_y_continuous (labels = scales::percent) + scale_fill_manual (values = c ("#FE0000", "orange","#2F496E", "#2988BC", "#5CC5EF", "white"), name = "Known driver role?") + ggtitle ("BRCA") + theme (plot.title = element_text (hjust = 0.5, size = 12, face = "italic"))#
+pipe.back.sig <- subset (pipeline.back, Detected > 3 | (Detected > 0 & KnownDriver != "No"))#
 #
-#NOW GBM#
+mat.back.plot <- pipe.back.sig[,c ("Gene", "Whole", "TypeI", "TypeII", "TypeIII", "TypeIV")]#
+mat.back.melt <- melt (mat.back.plot)#
+mat.back.melt$value <- ifelse (mat.back.melt$value < 0.05, 1, 0)#
+mat.back.plot <- acast (mat.back.melt, Gene ~ variable, value.var = "value")#
 #
-pred.data <- read.table (file = "../raw_data/matrix_gbm.txt", sep = "\t", header = TRUE, check.names = FALSE)#
-pred.melt <- melt (subset (pred.data, NPat > 4))#
-sub.analyze <- subset (pred.melt, !(variable %in% c ("NPat", "Group", "Detected")))#
+#CALC DENDROGRAM FROM CATEGORIES#
+model.type <- hclust (dist (t(mat.back.plot)))#
+dhc.type <- as.dendrogram (model.type)#
+ddata.type <- dendro_data (dhc.type, type = "rectangle")#
+dendro.type <- ggplot (segment (ddata.type)) + geom_segment (aes (x = x, y = y, xend = xend, yend = yend)) + theme (panel.background = element_blank(), axis.text = element_blank(), axis.ticks = element_blank(), axis.title = element_blank())#
 #
-sub.analyze$AllDriver <- factor (sub.analyze$AllDriver, levels = c ("Missense somatic drivers in matching tissue",  "Missense somatic drivers in other tissues", "Other somatic drivers in other tissues", "Other somatic drivers in matching tissue", "Other germline drivers in other tissues", "No"))#
-sub.analyze$variable <- factor (sub.analyze$variable, levels = c ("MutSigCV", "OncodriveFM", "Hotspot", "OncodriveCLUST", "NMC", "MutSig-CL", "iSIMPRe", "iPAC", "GraphPAC", "SpacePAC", "CLUMPS", "e-Driver", "ActiveDriver", "LowMACA", "e-Driver3D"))#
+pipe.back.sig$Gene <- factor (pipe.back.sig$Gene, levels = rev(rownames (mat.plot)[model.gene$order]))#
+pipe.back.melt <- melt (pipe.back.sig[,c ("Gene", "Whole", "TypeI", "TypeII", "TypeIII", "TypeIV", "NPat", "Detected", "KnownDriver")])#
+pipe.back.melt$value <- ifelse (pipe.back.melt$value < 0.05, "Yes", "No")#
 #
-sub.gbm.plot <- subset (sub.analyze, value < 0.05)#
-#gbm.plot <- ggplot (sub.gbm.plot, aes (x = variable)) + geom_bar (position = "fill", aes (fill = AllDriver), color = "black") + theme (axis.text = element_text (color = "black"), axis.ticks = element_line (color = "black"), axis.line.x = element_line (color = "black"), axis.line.y = element_line (color = "black"), panel.background = element_blank(), axis.text.x = element_text (angle = 45, hjust = 1), legend.position = "none", axis.title = element_blank()) + scale_y_continuous (labels = scales::percent) + scale_fill_manual (values = c ("#FE0000","orange", "#2988BC", "white"), name = "Known driver role?")  + ggtitle ("GBM") + theme (plot.title = element_text (hjust = 0.5, size = 12, face = "italic"))#
-gbm.plot <- ggplot (sub.gbm.plot, aes (x = variable)) + geom_bar (position = "fill", aes (fill = AllDriver), color = "black") + theme (axis.text = element_text (color = "black"), axis.ticks.y = element_line (color = "black"), axis.ticks.x = element_blank(), axis.line.x = element_line (color = "black"), axis.line.y = element_line (color = "black"), panel.background = element_blank(), axis.text.x = element_blank(), legend.position = "none", axis.title = element_blank()) + scale_y_continuous (labels = scales::percent) + scale_fill_manual (values = c ("#FE0000","orange", "#2988BC", "white"), name = "Known driver role?")  + ggtitle ("GBM") + theme (plot.title = element_text (hjust = 0.5, size = 12, face = "italic"))#
+#ORDER CATEGORIES#
+types.sorted <- colnames (mat.back.plot)[model.type$order]#
+types.sorted[6] <- "NPat"#
+types.sorted[7] <- "Detected"#
+pipe.back.melt$variable <- factor (pipe.back.melt$variable, levels = types.sorted)#
 #
-#NOW LUAD#
+#CREATE THE PLOT FOR THE CATEGORIES#
+type.plot <- ggplot (subset (pipe.back.melt, !(variable %in% c("NPat", "Detected"))), aes (x = variable, y = Gene)) + geom_tile (aes (fill = value), color = "black") + theme (axis.text = element_text (color = "black"), axis.text.x = element_text (angle = 45, hjust = 1), axis.ticks = element_blank(), axis.line = element_blank(), panel.background = element_blank(), axis.title = element_blank(), legend.position = "none") + scale_fill_manual (name = "Detected", values = c("white", "#FB6542")) + theme (axis.text.y = element_blank())#
 #
-pred.data <- read.table (file = "../raw_data/matrix_luad.txt", sep = "\t", header = TRUE, check.names = FALSE)#
-pred.melt <- melt (subset (pred.data, NPat > 4))#
-sub.analyze <- subset (pred.melt, !(variable %in% c ("NPat", "Group", "Detected")))#
+#ADJUST HEIGHTS OF THE METHODS#
+gA=ggplot_gtable(ggplot_build(heat.plot))#
+gB=ggplot_gtable(ggplot_build(type.plot))#
+gC=ggplot_gtable(ggplot_build(known.plot))#
+gD=ggplot_gtable(ggplot_build(npat.plot))#
+gE=ggplot_gtable(ggplot_build(dendro.gene))#
+maxHeight = grid::unit.pmax(gA$heights, gB$heights, gC$heights, gD$heights, gE$heights)#
+gA$heights <- as.list(maxHeight)#
+gB$heights <- as.list(maxHeight)#
+gC$heights <- as.list(maxHeight)#
+gD$heights <- as.list(maxHeight)#
+gE$heights <- as.list(maxHeight)#
 #
-sub.analyze$AllDriver <- factor (sub.analyze$AllDriver, levels = c ("Missense somatic drivers in matching tissue",  "Missense somatic drivers in other tissues", "Other somatic drivers in other tissues", "Other somatic drivers in matching tissue", "Other germline drivers in other tissues", "No"))#
-sub.analyze$variable <- factor (sub.analyze$variable, levels = c ("MutSigCV", "OncodriveFM", "Hotspot", "OncodriveCLUST", "NMC", "MutSig-CL", "iSIMPRe", "iPAC", "GraphPAC", "SpacePAC", "CLUMPS", "e-Driver", "ActiveDriver", "LowMACA", "e-Driver3D"))#
+gF=ggplot_gtable(ggplot_build(dendro.meth))#
+gG=ggplot_gtable(ggplot_build(dendro.type))#
 #
-sub.luad.plot <- subset (sub.analyze, value < 0.05)#
-luad.plot <- ggplot (sub.luad.plot, aes (x = variable)) + geom_bar (position = "fill", aes (fill = AllDriver), color = "black") + theme (axis.text = element_text (color = "black"), axis.ticks = element_line (color = "black"), axis.line.x = element_line (color = "black"), axis.line.y = element_line (color = "black"), panel.background = element_blank(), axis.text.x = element_text (angle = 45, hjust = 1), legend.position = "none", axis.title = element_blank()) + scale_y_continuous (labels = scales::percent) + scale_fill_manual (values = c ("#FE0000", "orange", "#2F496E", "#5CC5EF", "white"), name = "Known driver role?") + ggtitle ("LUAD") + theme (plot.title = element_text (hjust = 0.5, size = 12, face = "italic"))#
+maxWidth = grid::unit.pmax(gA$widths, gF$widths)#
+gA$widths <- as.list(maxWidth)#
+gF$widths <- as.list(maxWidth)#
 #
-#PUT IT TOGETHER#
+maxWidth = grid::unit.pmax(gB$widths, gG$widths)#
+gB$widths <- as.list(maxWidth)#
+gG$widths <- as.list(maxWidth)#
 #
-grid.arrange (arrangeGrob (blca.plot, brca.plot, gbm.plot, luad.plot, ncol = 1, heights = c (3,3,3,5)), plot.legend, ncol = 2, widths = c (3,2))
-dim (sub.4)
-pred.data <- read.table (file = ".../raw_data/matrix_brca.txt", sep = "\t", header = TRUE, check.names = FALSE)#
-pred.melt <- melt (subset (pred.data, NPat > 4))#
-sub.analyze <- subset (pred.melt, !(variable %in% c ("NPat", "Group", "Detected")))#
-#
-sub.analyze$AllDriver <- factor (sub.analyze$AllDriver, levels = c ("Missense somatic drivers in matching tissue",  "Missense somatic drivers in other tissues", "Other somatic drivers in other tissues", "Other somatic drivers in matching tissue", "Other germline drivers in other tissues", "No"))#
-sub.analyze$variable <- factor (sub.analyze$variable, levels = c ("MutSigCV", "OncodriveFM", "Hotspot", "OncodriveCLUST", "NMC", "MutSig-CL", "iSIMPRe", "iPAC", "GraphPAC", "SpacePAC", "CLUMPS", "e-Driver", "ActiveDriver", "LowMACA", "e-Driver3D"))#
-#
-sub.brca.plot <- subset (sub.analyze, value < 0.05)#
-brca.plot <- ggplot (sub.brca.plot, aes (x = variable)) + geom_bar (position = "fill", aes (fill = AllDriver), color = "black") + theme (axis.text = element_text (color = "black"), axis.ticks.y = element_line (color = "black"), axis.ticks.x = element_blank(), axis.line.x = element_line (color = "black"), axis.line.y = element_line (color = "black"), panel.background = element_blank(), axis.text.x = element_blank(), legend.position = "none", axis.title = element_blank()) + scale_y_continuous (labels = scales::percent) + scale_fill_manual (values = c ("#FE0000", "orange","#2F496E", "#2988BC", "#5CC5EF", "white"), name = "Known driver role?") + ggtitle ("BRCA") + theme (plot.title = element_text (hjust = 0.5, size = 12, face = "italic"))
-bca.plot
-pred.data <- read.table (file = ".../raw_data/matrix_brca.txt", sep = "\t", header = TRUE, check.names = FALSE)#
-pred.melt <- melt (subset (pred.data, NPat > 4))#
-sub.analyze <- subset (pred.melt, !(variable %in% c ("NPat", "Group", "Detected")))#
-#
-sub.analyze$AllDriver <- factor (sub.analyze$AllDriver, levels = c ("Missense somatic drivers in matching tissue",  "Missense somatic drivers in other tissues", "Other somatic drivers in other tissues", "Other somatic drivers in matching tissue", "Other germline drivers in other tissues", "No"))#
-sub.analyze$variable <- factor (sub.analyze$variable, levels = c ("MutSigCV", "OncodriveFM", "Hotspot", "OncodriveCLUST", "NMC", "MutSig-CL", "iSIMPRe", "iPAC", "GraphPAC", "SpacePAC", "CLUMPS", "e-Driver", "ActiveDriver", "LowMACA", "e-Driver3D"))#
-#
-sub.brca.plot <- subset (sub.analyze, value < 0.05)#
-brca.plot <- ggplot (sub.brca.plot, aes (x = variable)) + geom_bar (position = "fill", aes (fill = AllDriver), color = "black") + theme (axis.text = element_text (color = "black"), axis.ticks.y = element_line (color = "black"), axis.ticks.x = element_blank(), axis.line.x = element_line (color = "black"), axis.line.y = element_line (color = "black"), panel.background = element_blank(), axis.text.x = element_blank(), legend.position = "none", axis.title = element_blank()) + scale_y_continuous (labels = scales::percent) + scale_fill_manual (values = c ("#FE0000", "orange","#2F496E", "#2988BC", "white"), name = "Known driver role?") + ggtitle ("BRCA") + theme (plot.title = element_text (hjust = 0.5, size = 12, face = "italic"))
-pred.data <- read.table (file = "../raw_data/matrix_brca.txt", sep = "\t", header = TRUE, check.names = FALSE)#
-pred.melt <- melt (subset (pred.data, NPat > 4))#
-sub.analyze <- subset (pred.melt, !(variable %in% c ("NPat", "Group", "Detected")))#
-#
-sub.analyze$AllDriver <- factor (sub.analyze$AllDriver, levels = c ("Missense somatic drivers in matching tissue",  "Missense somatic drivers in other tissues", "Other somatic drivers in other tissues", "Other somatic drivers in matching tissue", "Other germline drivers in other tissues", "No"))#
-sub.analyze$variable <- factor (sub.analyze$variable, levels = c ("MutSigCV", "OncodriveFM", "Hotspot", "OncodriveCLUST", "NMC", "MutSig-CL", "iSIMPRe", "iPAC", "GraphPAC", "SpacePAC", "CLUMPS", "e-Driver", "ActiveDriver", "LowMACA", "e-Driver3D"))#
-#
-sub.brca.plot <- subset (sub.analyze, value < 0.05)#
-brca.plot <- ggplot (sub.brca.plot, aes (x = variable)) + geom_bar (position = "fill", aes (fill = AllDriver), color = "black") + theme (axis.text = element_text (color = "black"), axis.ticks.y = element_line (color = "black"), axis.ticks.x = element_blank(), axis.line.x = element_line (color = "black"), axis.line.y = element_line (color = "black"), panel.background = element_blank(), axis.text.x = element_blank(), legend.position = "none", axis.title = element_blank()) + scale_y_continuous (labels = scales::percent) + scale_fill_manual (values = c ("#FE0000", "orange","#2F496E", "#2988BC", "white"), name = "Known driver role?") + ggtitle ("BRCA") + theme (plot.title = element_text (hjust = 0.5, size = 12, face = "italic"))
-brca.plot
-library (ggplot2)#
-library (reshape)#
-library (gridExtra)#
-#
-#THIS IS PART "E" OF THE PLOT#
-#
-#THIS IS A FUNCTION THAT EXTRACTS THE LEGEND FROM A GGPLOT#
-#TOOK IT FROM https://github.com/hadley/ggplot2/wiki/Share-a-legend-between-two-ggplot2-graphs#
-#
-g_legend<-function(a.gplot){#
-  tmp <- ggplot_gtable(ggplot_build(a.gplot))#
-  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")#
-  legend <- tmp$grobs[[leg]]#
-  return(legend)}#
-#
-#BLCA#
-#
-pred.data <- read.table (file = "../raw_data/matrix_blca.txt", sep = "\t", header = TRUE, check.names = FALSE)#
-pred.melt <- melt (subset (pred.data, NPat > 4))#
-sub.analyze <- subset (pred.melt, !(variable %in% c ("NPat", "Group", "Detected")))#
-#
-sub.analyze$AllDriver <- factor (sub.analyze$AllDriver, levels = c ("Missense somatic drivers in matching tissue",  "Missense somatic drivers in other tissues", "Other somatic drivers in other tissues", "Other somatic drivers in matching tissue", "Other germline drivers in other tissues", "No"))#
-sub.analyze$variable <- factor (sub.analyze$variable, levels = c ("MutSigCV", "OncodriveFM", "Hotspot", "OncodriveCLUST", "NMC", "MutSig-CL", "iSIMPRe", "iPAC", "GraphPAC", "SpacePAC", "CLUMPS", "e-Driver", "ActiveDriver", "LowMACA", "e-Driver3D"))#
-#
-sub.blca.plot <- subset (sub.analyze, value < 0.05)#
-blca.plot <- ggplot (sub.blca.plot, aes (x = variable)) + geom_bar (position = "fill", aes (fill = AllDriver), color = "black") + theme (axis.text = element_text (color = "black"), axis.ticks.y = element_line (color = "black"), axis.ticks.x = element_blank(), axis.line.x = element_line (color = "black"), axis.line.y = element_line (color = "black"), panel.background = element_blank(), axis.text.x = element_blank(), legend.position = "none", axis.title = element_blank()) + scale_y_continuous (labels = scales::percent) + scale_fill_manual (values = c ("#FE0000", "orange","#2F496E", "#2988BC", "#5CC5EF", "white"), name = "Known driver role?") + ggtitle ("BLCA") + theme (plot.title = element_text (hjust = 0.5, size = 12, face = "italic"))#
-#
-blca.legend <- ggplot (sub.blca.plot, aes (x = variable)) + geom_bar (position = "fill", aes (fill = AllDriver), color = "black") + theme (axis.text = element_text (color = "black"), axis.ticks = element_line (color = "black"), axis.line.x = element_line (color = "black"), axis.line.y = element_line (color = "black"), panel.background = element_blank(), axis.text.x = element_text (angle = 45, hjust = 1), legend.position = "right", axis.title = element_blank()) + scale_y_continuous (labels = scales::percent) + scale_fill_manual (values = c ("#FE0000", "orange","#2F496E", "#2988BC", "#5CC5EF", "white"), name = "Known driver role?") + ggtitle ("BLCA") + theme (plot.title = element_text (hjust = 0.5, size = 12, face = "italic"))#
-plot.legend <- g_legend (blca.legend)#
-#
-#NOW BRCA#
-#
-pred.data <- read.table (file = "../raw_data/matrix_brca.txt", sep = "\t", header = TRUE, check.names = FALSE)#
-pred.melt <- melt (subset (pred.data, NPat > 4))#
-sub.analyze <- subset (pred.melt, !(variable %in% c ("NPat", "Group", "Detected")))#
-#
-sub.analyze$AllDriver <- factor (sub.analyze$AllDriver, levels = c ("Missense somatic drivers in matching tissue",  "Missense somatic drivers in other tissues", "Other somatic drivers in other tissues", "Other somatic drivers in matching tissue", "Other germline drivers in other tissues", "No"))#
-sub.analyze$variable <- factor (sub.analyze$variable, levels = c ("MutSigCV", "OncodriveFM", "Hotspot", "OncodriveCLUST", "NMC", "MutSig-CL", "iSIMPRe", "iPAC", "GraphPAC", "SpacePAC", "CLUMPS", "e-Driver", "ActiveDriver", "LowMACA", "e-Driver3D"))#
-#
-sub.brca.plot <- subset (sub.analyze, value < 0.05)#
-brca.plot <- ggplot (sub.brca.plot, aes (x = variable)) + geom_bar (position = "fill", aes (fill = AllDriver), color = "black") + theme (axis.text = element_text (color = "black"), axis.ticks.y = element_line (color = "black"), axis.ticks.x = element_blank(), axis.line.x = element_line (color = "black"), axis.line.y = element_line (color = "black"), panel.background = element_blank(), axis.text.x = element_blank(), legend.position = "none", axis.title = element_blank()) + scale_y_continuous (labels = scales::percent) + scale_fill_manual (values = c ("#FE0000", "orange","#2F496E", "#2988BC", "#5CC5EF", "white"), name = "Known driver role?") + ggtitle ("BRCA") + theme (plot.title = element_text (hjust = 0.5, size = 12, face = "italic"))#
-#
-#NOW GBM#
-#
-pred.data <- read.table (file = "../raw_data/matrix_gbm.txt", sep = "\t", header = TRUE, check.names = FALSE)#
-pred.melt <- melt (subset (pred.data, NPat > 4))#
-sub.analyze <- subset (pred.melt, !(variable %in% c ("NPat", "Group", "Detected")))#
-#
-sub.analyze$AllDriver <- factor (sub.analyze$AllDriver, levels = c ("Missense somatic drivers in matching tissue",  "Missense somatic drivers in other tissues", "Other somatic drivers in other tissues", "Other somatic drivers in matching tissue", "Other germline drivers in other tissues", "No"))#
-sub.analyze$variable <- factor (sub.analyze$variable, levels = c ("MutSigCV", "OncodriveFM", "Hotspot", "OncodriveCLUST", "NMC", "MutSig-CL", "iSIMPRe", "iPAC", "GraphPAC", "SpacePAC", "CLUMPS", "e-Driver", "ActiveDriver", "LowMACA", "e-Driver3D"))#
-#
-sub.gbm.plot <- subset (sub.analyze, value < 0.05)#
-gbm.plot <- ggplot (sub.gbm.plot, aes (x = variable)) + geom_bar (position = "fill", aes (fill = AllDriver), color = "black") + theme (axis.text = element_text (color = "black"), axis.ticks.y = element_line (color = "black"), axis.ticks.x = element_blank(), axis.line.x = element_line (color = "black"), axis.line.y = element_line (color = "black"), panel.background = element_blank(), axis.text.x = element_blank(), legend.position = "none", axis.title = element_blank()) + scale_y_continuous (labels = scales::percent) + scale_fill_manual (values = c ("#FE0000","orange", "#2988BC", "white"), name = "Known driver role?")  + ggtitle ("GBM") + theme (plot.title = element_text (hjust = 0.5, size = 12, face = "italic"))#
-#
-#NOW LUAD#
-#
-pred.data <- read.table (file = "../raw_data/matrix_luad.txt", sep = "\t", header = TRUE, check.names = FALSE)#
-pred.melt <- melt (subset (pred.data, NPat > 4))#
-sub.analyze <- subset (pred.melt, !(variable %in% c ("NPat", "Group", "Detected")))#
-#
-sub.analyze$AllDriver <- factor (sub.analyze$AllDriver, levels = c ("Missense somatic drivers in matching tissue",  "Missense somatic drivers in other tissues", "Other somatic drivers in other tissues", "Other somatic drivers in matching tissue", "Other germline drivers in other tissues", "No"))#
-sub.analyze$variable <- factor (sub.analyze$variable, levels = c ("MutSigCV", "OncodriveFM", "Hotspot", "OncodriveCLUST", "NMC", "MutSig-CL", "iSIMPRe", "iPAC", "GraphPAC", "SpacePAC", "CLUMPS", "e-Driver", "ActiveDriver", "LowMACA", "e-Driver3D"))#
-#
-sub.luad.plot <- subset (sub.analyze, value < 0.05)#
-luad.plot <- ggplot (sub.luad.plot, aes (x = variable)) + geom_bar (position = "fill", aes (fill = AllDriver), color = "black") + theme (axis.text = element_text (color = "black"), axis.ticks = element_line (color = "black"), axis.line.x = element_line (color = "black"), axis.line.y = element_line (color = "black"), panel.background = element_blank(), axis.text.x = element_text (angle = 45, hjust = 1), legend.position = "none", axis.title = element_blank()) + scale_y_continuous (labels = scales::percent) + scale_fill_manual (values = c ("#FE0000", "orange", "#2F496E", "#5CC5EF", "white"), name = "Known driver role?") + ggtitle ("LUAD") + theme (plot.title = element_text (hjust = 0.5, size = 12, face = "italic"))#
-#
-#PUT IT TOGETHER#
-#
-grid.arrange (arrangeGrob (blca.plot, brca.plot, gbm.plot, luad.plot, ncol = 1, heights = c (3,3,3,5)), plot.legend, ncol = 2, widths = c (3,2))
+#ARRANGE IT ALL#
+grid.arrange (arrangeGrob (arrangeGrob(blca.plot, brca.plot, gbm.plot, luad.plot, nrow = 1), plot.legend, ncol = 1, heights = c (10,1)), empty.plot, arrangeGrob(empty.plot, gF, gG, empty.plot, empty.plot, gE, gA, gB, gC, gD, nrow = 2, widths = c (1/10, 4/5, 3/10, 2/25, 2/5), heights = c (1/10, 9/10)), heights = c (6,1,10))
+grid.arrange (empty.plot, gF, gG, empty.plot, empty.plot, gE, gA, gB, gC, gD, nrow = 2, widths = c (1/10, 4/5, 3/10, 2/25, 2/5), heights = c (1/10, 9/10))
+ggplot (pipe.melt, aes (x = "Known driver", y = Gene)) + geom_tile (aes (fill = Mode), color = "black")
+ggplot (pipe.melt, aes (x = "Known driver", y = Gene)) + geom_tile (aes (fill = Coverage), color = "black")
+head (pipe.melt)
+ggplot (pipeline.res, aes (x = "Known driver", y = Gene)) + geom_tile (aes (fill = Coverage), color = "black")
+pipe.melt
+thresholds <- c (0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9)
+thresholds <- c (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
 library (ggplot2)#
 library (reshape)#
 library (reshape2)#
@@ -1211,16 +833,18 @@ library (pheatmap)#
 #
 #THE SCRIPT STORES THE VALUES IN THIS MATRIX#
 m.res <- matrix (nrow = 15*4, ncol = 4)#
-colnames (m.res) <- c ("Method", "Precision", "Recall", "Tissue")#
+colnames (m.res) <- c ("Method", "Precision", "Recall", "Tissue", "Threshold")#
 m.res <- as.data.frame (m.res)#
+thresholds <- c (0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)#
 #
 #THE SCRIPT ITERATES THROUGH THE DIFFERENT MATRIXES AND CALCULATES THE PRECISION AND RECALL VALUES FOR EACH METHOD AND CATEGORY#
 tissues <- c ("blca", "brca", "gbm", "luad")#
 #
+for (thr in 1:length(thresholds)) {#
 for (t in 1:length (tissues)) {#
 	file.name <- paste ("../raw_data/matrix_", tissues[t], ".txt", sep = "")#
 	pred.data <- read.table (file = file.name, sep = "\t", header = TRUE, check.names = FALSE)#
-	pred.melt <- melt (subset (pred.data, NPat > 4))#
+	pred.melt <- melt (subset (pred.data, NPat > 4 & Coverage >= threshold))#
 #
 	sub.analyze <- subset (pred.melt, !(variable %in% c ("NPat", "Group", "Detected")))#
 	methods <- unique (sub.analyze$variable)#
@@ -1230,10 +854,11 @@ for (t in 1:length (tissues)) {#
 		true.pos <- nrow (subset (sub.m, KnownDriver == "Yes" & value < 0.05)) #NUMBER OF TRUE POSITIVES BY THE METHOD#
 		total.pos <- nrow (subset (sub.m, value < 0.05)) #NUMBER OF POSITIVES IDENTIFIED BY THE METHOD#
 		total.true <- nrow (subset (sub.m, KnownDriver == "Yes")) #NUMBER OF TOTAL TRUE GENES#
-		m.res[i + (15 * (t-1)),1] <- as.character (methods[i])#
-		m.res[i + (15 * (t-1)),2] <- true.pos/total.pos #PRECISION#
-		m.res[i + (15 * (t-1)),3] <- true.pos/total.true #RECALL#
-		m.res[i + (15 * (t-1)),4] <- as.character (tissues[t])#
+		m.res[thr*(i + (15 * (t-1))),1] <- as.character (methods[i])#
+		m.res[thr*(i + (15 * (t-1))),2] <- true.pos/total.pos #PRECISION#
+		m.res[thr*(i + (15 * (t-1))),3] <- true.pos/total.true #RECALL#
+		m.res[thr*(i + (15 * (t-1))),4] <- as.character (tissues[t])#
+		m.res[thr*(i + (15 * (t-1))),5] <- as.character(thresholds[thr])#
 	}#
 }#
 #
@@ -1267,10 +892,250 @@ for (t in 1:length (tissues)) {#
 		true.pos <- nrow (subset (sub.m, KnownDriver == "Yes" & value < 0.05))#
 		total.pos <- nrow (subset (sub.m, value < 0.05))#
 		total.true <- nrow (subset (sub.m, KnownDriver == "Yes"))#
-		m.res[15*4 + 5*(t-1) + c, 1] <- as.character (categories[c])#
-		m.res[15*4 + 5*(t-1) + c, 2] <- true.pos/total.pos#
-		m.res[15*4 + 5*(t-1) + c, 3] <- true.pos/total.true#
-		m.res[15*4 + 5*(t-1) + c, 4] <- as.character (tissues[t])#
+		m.res[thr*(15*4 + 5*(t-1) + c), 1] <- as.character (categories[c])#
+		m.res[thr*(15*4 + 5*(t-1) + c), 2] <- true.pos/total.pos#
+		m.res[thr*(15*4 + 5*(t-1) + c), 3] <- true.pos/total.true#
+		m.res[thr*(15*4 + 5*(t-1) + c), 4] <- as.character (tissues[t])#
+		m.res[thr*(15*4 + 5*(t-1) + c), 5] <- as.character(thresholds[thr])#
+	}#
+}#
+}#
+#
+m.res$Tissue <- factor (m.res$Tissue, levels = c ("blca", "brca", "gbm", "luad"), labels = c ("BLCA", "BRCA", "GBM", "LUAD"))#
+#
+#HEATMAP METHODS#
+#
+bk2 = unique(c(seq(0, 1, length=50)))#
+col1 <- colorRampPalette (c ("#4CB5F5", "white"))(15)#
+col2 <- colorRampPalette(c("white", "#F62A00"))(35)#
+#
+#FIG 3A#
+recall.data <- acast (subset (m.res, Method %in% c ("Whole gene", "Type I", "Type II", "Type III", "Type IV")), Method ~ Tissue, value.var = "Recall")#
+pheatmap (recall.data, main = "Recall\n", breaks = bk2, color = c (col1, col2))#
+#
+#FIG 3B#
+precision.data <- acast (subset (m.res, Method %in% c ("Whole gene", "Type I", "Type II", "Type III", "Type IV")), Method ~ Tissue, value.var = "Precision")#
+pheatmap (precision.data, main = "Precision\n", breaks = bk2, color = c (col1, col2))#
+#
+#FIG 3C#
+recall.data <- acast (subset (m.res, !(Method %in% c ("Whole gene", "Type I", "Type II", "Type III", "Type IV"))), Method ~ Tissue, value.var = "Recall")#
+pheatmap (recall.data, main = "Recall\n", breaks = bk2, color = c (col1, col2))#
+#
+#FIG 3D#
+precision.data <- acast (subset (m.res, !(Method %in% c ("Whole gene", "Type I", "Type II", "Type III", "Type IV"))), Method ~ Tissue, value.var = "Precision")#
+pheatmap (precision.data, main = "Precision\n", breaks = bk2, color = c (col1, col2))
+m.res <- matrix (nrow = 15*4, ncol = 5)#
+colnames (m.res) <- c ("Method", "Precision", "Recall", "Tissue", "Threshold")#
+m.res <- as.data.frame (m.res)#
+thresholds <- c (0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)#
+#
+#THE SCRIPT ITERATES THROUGH THE DIFFERENT MATRIXES AND CALCULATES THE PRECISION AND RECALL VALUES FOR EACH METHOD AND CATEGORY#
+tissues <- c ("blca", "brca", "gbm", "luad")#
+#
+for (thr in 1:length(thresholds)) {#
+for (t in 1:length (tissues)) {#
+	file.name <- paste ("../raw_data/matrix_", tissues[t], ".txt", sep = "")#
+	pred.data <- read.table (file = file.name, sep = "\t", header = TRUE, check.names = FALSE)#
+	pred.melt <- melt (subset (pred.data, NPat > 4 & Coverage >= threshold))#
+#
+	sub.analyze <- subset (pred.melt, !(variable %in% c ("NPat", "Group", "Detected")))#
+	methods <- unique (sub.analyze$variable)#
+#
+	for (i in 1:length(methods)) {#
+		sub.m <- subset (sub.analyze, variable == methods[i])#
+		true.pos <- nrow (subset (sub.m, KnownDriver == "Yes" & value < 0.05)) #NUMBER OF TRUE POSITIVES BY THE METHOD#
+		total.pos <- nrow (subset (sub.m, value < 0.05)) #NUMBER OF POSITIVES IDENTIFIED BY THE METHOD#
+		total.true <- nrow (subset (sub.m, KnownDriver == "Yes")) #NUMBER OF TOTAL TRUE GENES#
+		m.res[thr*(i + (15 * (t-1))),1] <- as.character (methods[i])#
+		m.res[thr*(i + (15 * (t-1))),2] <- true.pos/total.pos #PRECISION#
+		m.res[thr*(i + (15 * (t-1))),3] <- true.pos/total.true #RECALL#
+		m.res[thr*(i + (15 * (t-1))),4] <- as.character (tissues[t])#
+		m.res[thr*(i + (15 * (t-1))),5] <- as.character(thresholds[thr])#
+	}#
+}#
+#
+#NOW THE SAME PER CATEGORIES#
+#
+categories <- c ("Whole gene", "Type I", "Type II", "Type III", "Type IV")#
+#
+for (t in 1:length (tissues)) {#
+	file.name <- paste ("../raw_data/matrix_", tissues[t], ".txt", sep = "")#
+	pred.data <- read.table (file = file.name, sep = "\t", header = TRUE, check.names = FALSE)#
+	pred.melt <- melt (subset (pred.data, NPat > 4))#
+#
+	sub.analyze <- subset (pred.melt, !(variable %in% c ("NPat", "Group", "Detected")))#
+	for (c in 1:length (categories)) {#
+		sub.m <- sub.analyze#
+		if (categories[c] == "Whole gene") {#
+			sub.m <- subset (sub.analyze, variable %in% c("OncodriveFM", "MutSigCV"))#
+		}#
+		else if (categories[c] == "Type I") {#
+			sub.m <- subset (sub.analyze, variable %in% c("MutSig-CL", "OncodriveCLUST", "NMC", "Hotspot", "iSIMPRe"))#
+		}#
+		else if (categories[c] == "Type II") {#
+			sub.m <- subset (sub.analyze, variable %in% c("iPAC", "GraphPAC", "SpacePAC", "CLUMPS"))#
+		}#
+		else if (categories[c] == "Type III") {#
+			sub.m <- subset (sub.analyze, variable %in% c("e-Driver", "ActiveDriver", "LowMACA"))#
+		}#
+		else if (categories[c] == "Type IV") {#
+			sub.m <- subset (sub.analyze, variable %in% c("e-Driver3D"))#
+		}#
+		true.pos <- nrow (subset (sub.m, KnownDriver == "Yes" & value < 0.05))#
+		total.pos <- nrow (subset (sub.m, value < 0.05))#
+		total.true <- nrow (subset (sub.m, KnownDriver == "Yes"))#
+		m.res[thr*(15*4 + 5*(t-1) + c), 1] <- as.character (categories[c])#
+		m.res[thr*(15*4 + 5*(t-1) + c), 2] <- true.pos/total.pos#
+		m.res[thr*(15*4 + 5*(t-1) + c), 3] <- true.pos/total.true#
+		m.res[thr*(15*4 + 5*(t-1) + c), 4] <- as.character (tissues[t])#
+		m.res[thr*(15*4 + 5*(t-1) + c), 5] <- as.character(thresholds[thr])#
+	}#
+}#
+}#
+#
+m.res$Tissue <- factor (m.res$Tissue, levels = c ("blca", "brca", "gbm", "luad"), labels = c ("BLCA", "BRCA", "GBM", "LUAD"))
+#THE SCRIPT STORES THE VALUES IN THIS MATRIX#
+m.res <- matrix (nrow = 15*4, ncol = 5)#
+colnames (m.res) <- c ("Method", "Precision", "Recall", "Tissue", "Threshold")#
+m.res <- as.data.frame (m.res)#
+thresholds <- c (0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)#
+#
+#THE SCRIPT ITERATES THROUGH THE DIFFERENT MATRIXES AND CALCULATES THE PRECISION AND RECALL VALUES FOR EACH METHOD AND CATEGORY#
+tissues <- c ("blca", "brca", "gbm", "luad")#
+#
+for (thr in 1:length(thresholds)) {#
+for (t in 1:length (tissues)) {#
+	file.name <- paste ("../raw_data/matrix_", tissues[t], ".txt", sep = "")#
+	pred.data <- read.table (file = file.name, sep = "\t", header = TRUE, check.names = FALSE)#
+	pred.melt <- melt (subset (pred.data, NPat > 4 & Coverage >= thresholds[thr]))#
+#
+	sub.analyze <- subset (pred.melt, !(variable %in% c ("NPat", "Group", "Detected")))#
+	methods <- unique (sub.analyze$variable)#
+#
+	for (i in 1:length(methods)) {#
+		sub.m <- subset (sub.analyze, variable == methods[i])#
+		true.pos <- nrow (subset (sub.m, KnownDriver == "Yes" & value < 0.05)) #NUMBER OF TRUE POSITIVES BY THE METHOD#
+		total.pos <- nrow (subset (sub.m, value < 0.05)) #NUMBER OF POSITIVES IDENTIFIED BY THE METHOD#
+		total.true <- nrow (subset (sub.m, KnownDriver == "Yes")) #NUMBER OF TOTAL TRUE GENES#
+		m.res[thr*(i + (15 * (t-1))),1] <- as.character (methods[i])#
+		m.res[thr*(i + (15 * (t-1))),2] <- true.pos/total.pos #PRECISION#
+		m.res[thr*(i + (15 * (t-1))),3] <- true.pos/total.true #RECALL#
+		m.res[thr*(i + (15 * (t-1))),4] <- as.character (tissues[t])#
+		m.res[thr*(i + (15 * (t-1))),5] <- as.character(thresholds[thr])#
+	}#
+}#
+#
+#NOW THE SAME PER CATEGORIES#
+#
+categories <- c ("Whole gene", "Type I", "Type II", "Type III", "Type IV")#
+#
+for (t in 1:length (tissues)) {#
+	file.name <- paste ("../raw_data/matrix_", tissues[t], ".txt", sep = "")#
+	pred.data <- read.table (file = file.name, sep = "\t", header = TRUE, check.names = FALSE)#
+	pred.melt <- melt (subset (pred.data, NPat > 4 & Coverage >= thresholds[thr]))#
+#
+	sub.analyze <- subset (pred.melt, !(variable %in% c ("NPat", "Group", "Detected")))#
+	for (c in 1:length (categories)) {#
+		sub.m <- sub.analyze#
+		if (categories[c] == "Whole gene") {#
+			sub.m <- subset (sub.analyze, variable %in% c("OncodriveFM", "MutSigCV"))#
+		}#
+		else if (categories[c] == "Type I") {#
+			sub.m <- subset (sub.analyze, variable %in% c("MutSig-CL", "OncodriveCLUST", "NMC", "Hotspot", "iSIMPRe"))#
+		}#
+		else if (categories[c] == "Type II") {#
+			sub.m <- subset (sub.analyze, variable %in% c("iPAC", "GraphPAC", "SpacePAC", "CLUMPS"))#
+		}#
+		else if (categories[c] == "Type III") {#
+			sub.m <- subset (sub.analyze, variable %in% c("e-Driver", "ActiveDriver", "LowMACA"))#
+		}#
+		else if (categories[c] == "Type IV") {#
+			sub.m <- subset (sub.analyze, variable %in% c("e-Driver3D"))#
+		}#
+		true.pos <- nrow (subset (sub.m, KnownDriver == "Yes" & value < 0.05))#
+		total.pos <- nrow (subset (sub.m, value < 0.05))#
+		total.true <- nrow (subset (sub.m, KnownDriver == "Yes"))#
+		m.res[thr*(15*4 + 5*(t-1) + c), 1] <- as.character (categories[c])#
+		m.res[thr*(15*4 + 5*(t-1) + c), 2] <- true.pos/total.pos#
+		m.res[thr*(15*4 + 5*(t-1) + c), 3] <- true.pos/total.true#
+		m.res[thr*(15*4 + 5*(t-1) + c), 4] <- as.character (tissues[t])#
+		m.res[thr*(15*4 + 5*(t-1) + c), 5] <- as.character(thresholds[thr])#
+	}#
+}#
+}
+dim (m.res)
+library (ggplot2)#
+library (reshape)#
+library (reshape2)#
+library (pheatmap)#
+#
+#THE SCRIPT STORES THE VALUES IN THIS MATRIX#
+m.res <- matrix (nrow = 15*4, ncol = 5)#
+colnames (m.res) <- c ("Method", "Precision", "Recall", "Tissue", "Threshold")#
+m.res <- as.data.frame (m.res)#
+thresholds <- c (0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)#
+#
+#THE SCRIPT ITERATES THROUGH THE DIFFERENT MATRIXES AND CALCULATES THE PRECISION AND RECALL VALUES FOR EACH METHOD AND CATEGORY#
+tissues <- c ("blca", "brca", "gbm", "luad")#
+#
+for (thr in 1:length(thresholds)) {#
+	for (t in 1:length (tissues)) {#
+		file.name <- paste ("../raw_data/matrix_", tissues[t], ".txt", sep = "")#
+		pred.data <- read.table (file = file.name, sep = "\t", header = TRUE, check.names = FALSE)#
+		pred.melt <- melt (subset (pred.data, NPat > 4 & Coverage >= thresholds[thr]))#
+#
+		sub.analyze <- subset (pred.melt, !(variable %in% c ("NPat", "Group", "Detected", "Coverage")))#
+		methods <- unique (sub.analyze$variable)#
+#
+		for (i in 1:length(methods)) {#
+			sub.m <- subset (sub.analyze, variable == methods[i])#
+			true.pos <- nrow (subset (sub.m, KnownDriver == "Yes" & value < 0.05)) #NUMBER OF TRUE POSITIVES BY THE METHOD#
+			total.pos <- nrow (subset (sub.m, value < 0.05)) #NUMBER OF POSITIVES IDENTIFIED BY THE METHOD#
+			total.true <- nrow (subset (sub.m, KnownDriver == "Yes")) #NUMBER OF TOTAL TRUE GENES#
+			m.res[thr*(i + (15 * (t-1))),1] <- as.character (methods[i])#
+			m.res[thr*(i + (15 * (t-1))),2] <- true.pos/total.pos #PRECISION#
+			m.res[thr*(i + (15 * (t-1))),3] <- true.pos/total.true #RECALL#
+			m.res[thr*(i + (15 * (t-1))),4] <- as.character (tissues[t])#
+			m.res[thr*(i + (15 * (t-1))),5] <- as.character(thresholds[thr])#
+		}#
+	}#
+#
+	#NOW THE SAME PER CATEGORIES#
+#
+	categories <- c ("Whole gene", "Type I", "Type II", "Type III", "Type IV")#
+#
+	for (t in 1:length (tissues)) {#
+		file.name <- paste ("../raw_data/matrix_", tissues[t], ".txt", sep = "")#
+		pred.data <- read.table (file = file.name, sep = "\t", header = TRUE, check.names = FALSE)#
+		pred.melt <- melt (subset (pred.data, NPat > 4 & Coverage >= thresholds[thr]))#
+#
+		sub.analyze <- subset (pred.melt, !(variable %in% c ("NPat", "Group", "Detected", "Coverage")))#
+		for (c in 1:length (categories)) {#
+			sub.m <- sub.analyze#
+			if (categories[c] == "Whole gene") {#
+				sub.m <- subset (sub.analyze, variable %in% c("OncodriveFM", "MutSigCV"))#
+			}#
+			else if (categories[c] == "Type I") {#
+				sub.m <- subset (sub.analyze, variable %in% c("MutSig-CL", "OncodriveCLUST", "NMC", "Hotspot", "iSIMPRe"))#
+			}#
+			else if (categories[c] == "Type II") {#
+				sub.m <- subset (sub.analyze, variable %in% c("iPAC", "GraphPAC", "SpacePAC", "CLUMPS"))#
+			}#
+			else if (categories[c] == "Type III") {#
+				sub.m <- subset (sub.analyze, variable %in% c("e-Driver", "ActiveDriver", "LowMACA"))#
+			}#
+			else if (categories[c] == "Type IV") {#
+				sub.m <- subset (sub.analyze, variable %in% c("e-Driver3D"))#
+			}#
+			true.pos <- nrow (subset (sub.m, KnownDriver == "Yes" & value < 0.05))#
+			total.pos <- nrow (subset (sub.m, value < 0.05))#
+			total.true <- nrow (subset (sub.m, KnownDriver == "Yes"))#
+			m.res[thr*(15*4 + 5*(t-1) + c), 1] <- as.character (categories[c])#
+			m.res[thr*(15*4 + 5*(t-1) + c), 2] <- true.pos/total.pos#
+			m.res[thr*(15*4 + 5*(t-1) + c), 3] <- true.pos/total.true#
+			m.res[thr*(15*4 + 5*(t-1) + c), 4] <- as.character (tissues[t])#
+			m.res[thr*(15*4 + 5*(t-1) + c), 5] <- as.character(thresholds[thr])#
+		}#
 	}#
 }#
 #
@@ -1297,3 +1162,168 @@ pheatmap (recall.data, main = "Recall\n", breaks = bk2, color = c (col1, col2))#
 #FIG 3D#
 precision.data <- acast (subset (m.res, !(Method %in% c ("Whole gene", "Type I", "Type II", "Type III", "Type IV"))), Method ~ Tissue, value.var = "Precision")#
 pheatmap (precision.data, main = "Precision\n", breaks = bk2, color = c (col1, col2))
+m.res
+m.res <- matrix (nrow = 15*4, ncol = 5)#
+colnames (m.res) <- c ("Method", "Precision", "Recall", "Tissue", "Threshold")#
+m.res <- as.data.frame (m.res)#
+thresholds <- c (0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)#
+#
+#THE SCRIPT ITERATES THROUGH THE DIFFERENT MATRIXES AND CALCULATES THE PRECISION AND RECALL VALUES FOR EACH METHOD AND CATEGORY#
+tissues <- c ("blca", "brca", "gbm", "luad")#
+#
+count <- 1#
+#
+for (thr in 1:length(thresholds)) {#
+	for (t in 1:length (tissues)) {#
+		file.name <- paste ("../raw_data/matrix_", tissues[t], ".txt", sep = "")#
+		pred.data <- read.table (file = file.name, sep = "\t", header = TRUE, check.names = FALSE)#
+		pred.melt <- melt (subset (pred.data, NPat > 4 & Coverage >= thresholds[thr]))#
+#
+		sub.analyze <- subset (pred.melt, !(variable %in% c ("NPat", "Group", "Detected", "Coverage")))#
+		methods <- unique (sub.analyze$variable)#
+#
+		for (i in 1:length(methods)) {#
+			sub.m <- subset (sub.analyze, variable == methods[i])#
+			true.pos <- nrow (subset (sub.m, KnownDriver == "Yes" & value < 0.05)) #NUMBER OF TRUE POSITIVES BY THE METHOD#
+			total.pos <- nrow (subset (sub.m, value < 0.05)) #NUMBER OF POSITIVES IDENTIFIED BY THE METHOD#
+			total.true <- nrow (subset (sub.m, KnownDriver == "Yes")) #NUMBER OF TOTAL TRUE GENES#
+			m.res[count,1] <- as.character (methods[i])#
+			m.res[count,2] <- true.pos/total.pos #PRECISION#
+			m.res[count,3] <- true.pos/total.true #RECALL#
+			m.res[count,4] <- as.character (tissues[t])#
+			m.res[count,5] <- as.character(thresholds[thr])#
+			count <- count + 1#
+		}#
+	}#
+#
+	#NOW THE SAME PER CATEGORIES#
+#
+	categories <- c ("Whole gene", "Type I", "Type II", "Type III", "Type IV")#
+#
+	for (t in 1:length (tissues)) {#
+		file.name <- paste ("../raw_data/matrix_", tissues[t], ".txt", sep = "")#
+		pred.data <- read.table (file = file.name, sep = "\t", header = TRUE, check.names = FALSE)#
+		pred.melt <- melt (subset (pred.data, NPat > 4 & Coverage >= thresholds[thr]))#
+#
+		sub.analyze <- subset (pred.melt, !(variable %in% c ("NPat", "Group", "Detected", "Coverage")))#
+		for (c in 1:length (categories)) {#
+			sub.m <- sub.analyze#
+			if (categories[c] == "Whole gene") {#
+				sub.m <- subset (sub.analyze, variable %in% c("OncodriveFM", "MutSigCV"))#
+			}#
+			else if (categories[c] == "Type I") {#
+				sub.m <- subset (sub.analyze, variable %in% c("MutSig-CL", "OncodriveCLUST", "NMC", "Hotspot", "iSIMPRe"))#
+			}#
+			else if (categories[c] == "Type II") {#
+				sub.m <- subset (sub.analyze, variable %in% c("iPAC", "GraphPAC", "SpacePAC", "CLUMPS"))#
+			}#
+			else if (categories[c] == "Type III") {#
+				sub.m <- subset (sub.analyze, variable %in% c("e-Driver", "ActiveDriver", "LowMACA"))#
+			}#
+			else if (categories[c] == "Type IV") {#
+				sub.m <- subset (sub.analyze, variable %in% c("e-Driver3D"))#
+			}#
+			true.pos <- nrow (subset (sub.m, KnownDriver == "Yes" & value < 0.05))#
+			total.pos <- nrow (subset (sub.m, value < 0.05))#
+			total.true <- nrow (subset (sub.m, KnownDriver == "Yes"))#
+			m.res[count, 1] <- as.character (categories[c])#
+			m.res[count, 2] <- true.pos/total.pos#
+			m.res[count, 3] <- true.pos/total.true#
+			m.res[count, 4] <- as.character (tissues[t])#
+			m.res[count, 5] <- as.character(thresholds[thr])#
+			count <- count + 1#
+		}#
+	}#
+}#
+#
+m.res$Tissue <- factor (m.res$Tissue, levels = c ("blca", "brca", "gbm", "luad"), labels = c ("BLCA", "BRCA", "GBM", "LUAD"))
+head (m.res)
+library (ggplot2)
+ggplot (m.res, aes (x = Threshold, y = Precision)) + geom_line (color = Method)
+ggplot (m.res, aes (x = Threshold, y = Precision)) + geom_line (aes(color = Method))
+ggplot (m.res, aes (x = Threshold, y = Precision)) + geom_point (aes(color = Method))
+ggplot (m.res, aes (x = Threshold, y = Precision)) + geom_point (aes(color = Method)) + stat_smooth (aes (color = Method))
+ggplot (m.res, aes (x = Threshold, y = Precision)) + geom_point (aes(color = Method)) + geom_line (aes (color = Method))
+ggplot (m.res, aes (x = Threshold, y = Precision)) + geom_point (aes(color = Method)) + geom_line ()
+ggplot (m.res, aes (x = Threshold, y = Precision)) + geom_point () + facet_wrap (~Method)
+ggplot (m.res, aes (x = Threshold, y = Precision)) + geom_point (aes (color = Tissue)) + facet_wrap (~Method)
+ggplot (m.res, aes (x = Threshold, y = Recall)) + geom_point (aes (color = Tissue)) + facet_wrap (~Method)
+ggplot (m.res, aes (x = Threshold, y = Recall)) + geom_point (aes (color = Tissue)) + facet_wrap (~Method) + geom_smooth ()
+ggplot (m.res, aes (x = Threshold, y = Recall)) + geom_point (aes (color = Tissue)) + facet_wrap (~Method) + stat_smooth ()
+ggplot (m.res, aes (x = as.numeric(Threshold), y = Recall)) + geom_point (aes (color = Tissue)) + facet_wrap (~Method) + stat_smooth ()
+m.res <- matrix (nrow = 15*4, ncol = 5)#
+colnames (m.res) <- c ("Method", "Precision", "Recall", "Tissue", "Threshold")#
+m.res <- as.data.frame (m.res)#
+thresholds <- c (0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)#
+#
+#THE SCRIPT ITERATES THROUGH THE DIFFERENT MATRIXES AND CALCULATES THE PRECISION AND RECALL VALUES FOR EACH METHOD AND CATEGORY#
+tissues <- c ("blca", "brca", "gbm", "luad")#
+#
+count <- 1#
+#
+for (thr in 1:length(thresholds)) {#
+	for (t in 1:length (tissues)) {#
+		file.name <- paste ("../raw_data/matrix_", tissues[t], ".txt", sep = "")#
+		pred.data <- read.table (file = file.name, sep = "\t", header = TRUE, check.names = FALSE)#
+		pred.melt <- melt (subset (pred.data, NPat > 4 & Coverage >= as.numeric(thresholds[thr])))#
+#
+		sub.analyze <- subset (pred.melt, !(variable %in% c ("NPat", "Group", "Detected", "Coverage")))#
+		methods <- unique (sub.analyze$variable)#
+#
+		for (i in 1:length(methods)) {#
+			sub.m <- subset (sub.analyze, variable == methods[i])#
+			true.pos <- nrow (subset (sub.m, KnownDriver == "Yes" & value < 0.05)) #NUMBER OF TRUE POSITIVES BY THE METHOD#
+			total.pos <- nrow (subset (sub.m, value < 0.05)) #NUMBER OF POSITIVES IDENTIFIED BY THE METHOD#
+			total.true <- nrow (subset (sub.m, KnownDriver == "Yes")) #NUMBER OF TOTAL TRUE GENES#
+			m.res[count,1] <- as.character (methods[i])#
+			m.res[count,2] <- true.pos/total.pos #PRECISION#
+			m.res[count,3] <- true.pos/total.true #RECALL#
+			m.res[count,4] <- as.character (tissues[t])#
+			m.res[count,5] <- as.character(thresholds[thr])#
+			count <- count + 1#
+		}#
+	}#
+#
+	#NOW THE SAME PER CATEGORIES#
+#
+	categories <- c ("Whole gene", "Type I", "Type II", "Type III", "Type IV")#
+#
+	for (t in 1:length (tissues)) {#
+		file.name <- paste ("../raw_data/matrix_", tissues[t], ".txt", sep = "")#
+		pred.data <- read.table (file = file.name, sep = "\t", header = TRUE, check.names = FALSE)#
+		pred.melt <- melt (subset (pred.data, NPat > 4 & Coverage >= as.numeric(thresholds[thr])))#
+#
+		sub.analyze <- subset (pred.melt, !(variable %in% c ("NPat", "Group", "Detected", "Coverage")))#
+		for (c in 1:length (categories)) {#
+			sub.m <- sub.analyze#
+			if (categories[c] == "Whole gene") {#
+				sub.m <- subset (sub.analyze, variable %in% c("OncodriveFM", "MutSigCV"))#
+			}#
+			else if (categories[c] == "Type I") {#
+				sub.m <- subset (sub.analyze, variable %in% c("MutSig-CL", "OncodriveCLUST", "NMC", "Hotspot", "iSIMPRe"))#
+			}#
+			else if (categories[c] == "Type II") {#
+				sub.m <- subset (sub.analyze, variable %in% c("iPAC", "GraphPAC", "SpacePAC", "CLUMPS"))#
+			}#
+			else if (categories[c] == "Type III") {#
+				sub.m <- subset (sub.analyze, variable %in% c("e-Driver", "ActiveDriver", "LowMACA"))#
+			}#
+			else if (categories[c] == "Type IV") {#
+				sub.m <- subset (sub.analyze, variable %in% c("e-Driver3D"))#
+			}#
+			true.pos <- nrow (subset (sub.m, KnownDriver == "Yes" & value < 0.05))#
+			total.pos <- nrow (subset (sub.m, value < 0.05))#
+			total.true <- nrow (subset (sub.m, KnownDriver == "Yes"))#
+			m.res[count, 1] <- as.character (categories[c])#
+			m.res[count, 2] <- true.pos/total.pos#
+			m.res[count, 3] <- true.pos/total.true#
+			m.res[count, 4] <- as.character (tissues[t])#
+			m.res[count, 5] <- as.character(thresholds[thr])#
+			count <- count + 1#
+		}#
+	}#
+}#
+#
+m.res$Tissue <- factor (m.res$Tissue, levels = c ("blca", "brca", "gbm", "luad"), labels = c ("BLCA", "BRCA", "GBM", "LUAD"))
+ggplot (m.res, aes (x = as.numeric(Threshold), y = Precision)) + geom_point (aes (color = Tissue)) + facet_wrap (~Method) + geom_line (aes (color = Tissue))
+ggplot (m.res, aes (x = as.numeric(Threshold), y = Recall)) + geom_point (aes (color = Tissue)) + facet_wrap (~Method) + geom_line (aes (color = Tissue))

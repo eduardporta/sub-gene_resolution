@@ -1,4 +1,4 @@
-Gene	Tissue	NPat	KnownDriver	Mode	AllDriver	MutSigCV	OncodriveFM	OncodriveCLUST	NMC	MutSig-CL	e-Driver	e-Driver3D	iPAC	GraphPAC	SpacePAC	CLUMPS	iSIMPRe	ActiveDriver	Hotspot	LowMACA	Detected
+Gene	Tissue	NPat	KnownDriver	Mode	AllDriver	MutSigCV	OncodriveFM	OncodriveCLUST	NMC	MutSig.CL	e.Driver	e.Driver3D	iPAC	GraphPAC	SpacePAC	CLUMPS	iSIMPRe	ActiveDriver	Hotspot	LowMACA	Detected
 TPR	blca	14	No	Unk	Other somatic drivers in other tissues	0.2590258	0.962526628858225	1	1	0.521	1	1	1	1	1	1	1	0.00182091699578261	1	1	1
 CHEK2	blca	7	No	TSG	Other germline drivers in other tissues	1	1	1	1	0.0168	1	1	1	1	1	1	1	0.108421029359669	1	1	1
 SMARCA4	blca	11	No	Unk	Missense somatic drivers in other tissues	0.2653453	0.540595875931443	1	1	0.516	1	1	1	1	1	0.8344	1	0.00134280160495461	1	1	1

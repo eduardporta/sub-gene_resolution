@@ -10,7 +10,7 @@ egfr.melt <- melt (egfr.data)
 
 sub.methods <- subset (egfr.melt, variable %in% methods)
 sub.methods$variable <- factor (sub.methods$variable, levels = methods)
-sub.methods$value <- factor (sub.methods$value, levels = c (2,1,0), labels = c("EGFR interface\nmutations", "Other EGFR\nmutations", "No EGFR\nmutations"))
+sub.methods$value <- factor (sub.methods$value, levels = c (2,1,0), labels = c("Mutations in EGFR cluster", "Mutations outside EGFR cluster", "No EGFR mutations"))
 plot.meth <- ggplot (sub.methods, aes (x = Sample, y = variable)) + geom_tile (aes (fill = as.factor(value)), color = "black") + theme (axis.text.x = element_blank(), axis.ticks.x =element_blank()) + scale_fill_manual (name = "", values = c ("#F62A00", "#4CB5F5", "white" )) + theme (legend.position = "right", axis.text.y = element_text (color = "black"), axis.line.y = element_line (color = "black"), axis.ticks.y = element_line (color = "black"), axis.title = element_blank())
 
 mut.analysis <- c ("Sample", "SIFT", "Polyphen", "MutAssessor", "e-Driver3D")
@@ -28,7 +28,7 @@ sub.prot.melt$variable <- factor (sub.prot.melt$variable, levels = c ("EGFR-R-C"
 
 
 #RED-ORANGE
-plot.meth <- ggplot (sub.methods, aes (x = Sample, y = variable)) + geom_tile (aes (fill = as.factor(value)), color = "white") + theme (axis.text.x = element_blank(), axis.ticks.x =element_blank()) + scale_fill_manual (name = "", values = c ("#FE0038", "#FFB74C", "lightgray")) + theme (legend.position = "none", axis.text.y = element_text (color = "black"), axis.line.y = element_line (color = "black"), axis.ticks.y = element_line (color = "black"), axis.title = element_blank())
+plot.meth <- ggplot (subset (sub.methods, value != "No EGFR mutations"), aes (x = Sample, y = variable)) + geom_tile (aes (fill = as.factor(value)), color = "white") + theme (axis.text.x = element_blank(), axis.ticks.x =element_blank()) + scale_fill_manual (name = "", values = c ("#FE0038", "#FFB74C")) + theme (legend.position = "right", axis.text.y = element_text (color = "black"), axis.line.y = element_line (color = "black"), axis.ticks.y = element_line (color = "black"), axis.title = element_blank(), panel.background = element_blank())
 plot.prot <- ggplot (sub.prot.melt, aes (x = sub.prot.melt$'e-Driver3D', y = value)) + geom_boxplot (outlier.shape = NA) + facet_wrap (~variable, scales = "free", nrow = 1) + geom_point (position = position_jitter (width = 0.2), aes (color = sub.prot.melt$'e-Driver3D')) + theme (axis.text = element_text (color = "black"), axis.ticks = element_line (color = "black"), axis.line.x = element_line (color = "black"), axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.line.y = element_line (color = "black"), panel.background = element_blank(), axis.title.x = element_blank(), axis.title.y = element_text (face = "italic"), strip.background = element_blank(), strip.text = element_text (face = "italic")) + ylab ("Protein level (RPPA)\n") + scale_color_manual (name = "", values = c ("#FE0038", "#FFB74C", "lightgray")) + theme (legend.position = "bottom")
 grid.arrange (plot.meth, plot.prot, ncol = 1, heights = c (2, 4))
 
